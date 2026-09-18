@@ -1,13 +1,56 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { fadeUp, stagger, viewportOnce } from "@/components/ui/motion";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { slugify } from "@/lib/slug";
+import { expertiseVisual } from "./expertiseVisuals";
+
+function serviceHref(service) {
+  return `/services#service-tab-${slugify(service?.title)}`;
+}
+
+function ExpertiseCard({ service, index }) {
+  const Icon = expertiseVisual(service);
+  const number = String(index + 1).padStart(2, "0");
+
+  return (
+    <Link
+      href={serviceHref(service)}
+      className="dept-card dept-card--service"
+      aria-label={`${service.title} — learn more`}
+    >
+      <Icon className="dept-card__mark" strokeWidth={1.15} />
+      <div className="flex items-center gap-3">
+        <span className="dept-icon dept-icon--cyan">
+          <Icon size={20} strokeWidth={2.1} />
+        </span>
+        <span className="text-[0.8rem] font-semibold tracking-[0.12em] text-ink-400">
+          {number}
+        </span>
+      </div>
+      <h3 className="mt-5 text-[1.12rem] font-extrabold text-ink-900">{service.title}</h3>
+      {service.description ? (
+        <p className="mt-1.5 max-w-[17rem] pr-2 text-[0.9rem] leading-relaxed text-ink-500">
+          {service.description}
+        </p>
+      ) : null}
+      <div className="dept-card__foot">
+        <span className="dept-more">
+          Learn more
+          <ArrowRight size={14} strokeWidth={2.4} />
+        </span>
+        <span className="dept-arrow">
+          <ArrowRight size={16} strokeWidth={2.2} />
+        </span>
+      </div>
+    </Link>
+  );
+}
 
 export default function ExpertiseSection({ surface = "bg-cream" }) {
   const { data, isLoading, isError, refetch } = useGetPublishedHomepageQuery();
@@ -23,7 +66,7 @@ export default function ExpertiseSection({ surface = "bg-cream" }) {
           title={
             <>
               {expertise?.title || "Our"}{" "}
-              <span className="hero-gradient-text">{expertise?.highlight || "Expertise"}</span>
+              <span className="text-gradient">{expertise?.highlight || "Expertise"}</span>
             </>
           }
           subtitle={
@@ -40,7 +83,7 @@ export default function ExpertiseSection({ surface = "bg-cream" }) {
         )}
 
         {isError && (
-          <div className="section-stack mx-auto max-w-lg rounded-2xl border border-line bg-cream p-8 text-center">
+          <div className="card section-stack mx-auto max-w-lg p-8 text-center">
             <p className="font-semibold text-ink-900">Could not load this section.</p>
             <button type="button" className="btn btn-ghost btn-sm mt-4" onClick={() => refetch()}>
               Retry
@@ -50,48 +93,15 @@ export default function ExpertiseSection({ surface = "bg-cream" }) {
 
         {services.length > 0 && (
           <motion.div
-            className="section-stack grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="dept-grid__row section-stack mx-auto max-w-6xl"
             initial={reduce ? false : "hidden"}
             whileInView="visible"
             viewport={viewportOnce}
             variants={stagger(0, 0.08)}
           >
-            {services.map((service) => (
-              <motion.div
-                key={service.title}
-                variants={fadeUp}
-                whileHover={reduce ? undefined : { y: -4 }}
-                className="card card-hover flex flex-col p-5 sm:p-6"
-              >
-                <span className="icon-well">
-                  {service.icon ? (
-                    <Image
-                      src={service.icon}
-                      alt=""
-                      width={28}
-                      height={28}
-                      className="h-7 w-7 object-contain"
-                    />
-                  ) : null}
-                </span>
-
-                <h3 className="mt-5 text-lg font-bold text-ink-900">{service.title}</h3>
-                <span className="brand-divider mt-3" />
-
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-500">
-                  {service.description}
-                </p>
-
-                <Link
-                  href="/services"
-                  className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-accent transition-colors hover:text-accent-light"
-                >
-                  Learn more
-                  <ArrowUpRight
-                    size={15}
-                    className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                  />
-                </Link>
+            {services.map((service, index) => (
+              <motion.div key={service.title || index} className="h-full" variants={fadeUp}>
+                <ExpertiseCard service={service} index={index} />
               </motion.div>
             ))}
           </motion.div>

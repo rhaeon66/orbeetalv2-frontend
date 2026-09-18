@@ -8,14 +8,12 @@ import { ArrowRight, Check, Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { useGetPublishedServicesQuery } from "@/redux/features/cms/servicesApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { slugify } from "@/lib/slug";
 
 const EASE = [0.22, 1, 0.36, 1];
 
 function serviceTabId(service) {
-  const slug = String(service?.name || service?.id || "service")
-    .toLowerCase()
-    .replace(/\s+/g, "-");
-  return `service-tab-${slug}`;
+  return `service-tab-${slugify(service?.name || service?.id || "service")}`;
 }
 
 export default function ServicesSection({ surface = "bg-pale" }) {
@@ -30,10 +28,16 @@ export default function ServicesSection({ surface = "bg-pale" }) {
       setActiveId(null);
       return;
     }
-    if (!services.some((service) => service.id === activeId)) {
-      setActiveId(services[0].id);
-    }
-  }, [services, activeId]);
+    const hash = window.location.hash.replace(/^#/, "");
+    const hashed = hash
+      ? services.find((service) => serviceTabId(service) === hash)
+      : null;
+    setActiveId((current) => {
+      if (hashed) return hashed.id;
+      if (services.some((service) => service.id === current)) return current;
+      return services[0].id;
+    });
+  }, [services]);
 
   return (
     <section className={`section ${surface}`}>
@@ -110,7 +114,7 @@ export default function ServicesSection({ surface = "bg-pale" }) {
                 id="service-panel"
                 role="tabpanel"
                 aria-labelledby={serviceTabId(activeService)}
-                className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-14"
+                className="grid scroll-mt-28 items-center gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-14"
               >
                 <div>
                   <p className="text-sm font-bold uppercase tracking-[0.12em] text-primary">

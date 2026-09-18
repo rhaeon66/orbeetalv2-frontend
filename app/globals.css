@@ -818,6 +818,260 @@ html:not(.dark) .logo-on-light {
   border-color: color-mix(in srgb, var(--cyan) 45%, var(--line));
 }
 
+.dept-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.dept-stage__art {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.dept-stage__blob {
+  position: absolute;
+  border-radius: 9999px;
+  background: color-mix(in srgb, #fff 42%, transparent);
+}
+html.dark .dept-stage__blob {
+  background: color-mix(in srgb, var(--cyan) 10%, transparent);
+}
+.dept-stage__ring {
+  position: absolute;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 22%, transparent);
+}
+.dept-stage__dots {
+  position: absolute;
+  right: 11%;
+  top: 4.5rem;
+  height: 7.5rem;
+  width: 5.5rem;
+  opacity: 0.55;
+}
+.dept-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.05rem;
+}
+.dept-grid__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.05rem;
+}
+@media (min-width: 700px) {
+  .dept-grid__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .dept-grid__row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.dept-card {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  min-height: 11.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 1.35rem;
+  border: 1px solid color-mix(in srgb, #fff 55%, var(--line));
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, #fff 62%, transparent) 0%,
+      color-mix(in srgb, var(--pale) 38%, transparent) 100%
+    );
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--cyan) 10%, transparent);
+  padding: 1.3rem 1.35rem 1.2rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease, border-color 0.22s ease;
+}
+html.dark .dept-card {
+  border-color: color-mix(in srgb, var(--cyan) 24%, var(--line));
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--surface) 88%, transparent) 0%,
+      color-mix(in srgb, var(--pale) 28%, var(--surface)) 100%
+    );
+}
+.dept-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--cyan) 48%, var(--line));
+  box-shadow: var(--shadow-md);
+}
+.dept-card--featured {
+  min-height: 8.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) auto auto;
+  align-items: center;
+  gap: 1rem 1.75rem;
+  padding: 1.35rem 1.7rem;
+}
+@media (max-width: 899px) {
+  .dept-card--featured {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+.dept-icon {
+  display: inline-flex;
+  height: 2.7rem;
+  width: 2.7rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.85rem;
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, currentColor 22%, transparent);
+}
+.dept-icon--sky { background: #4dbfe8; color: #4dbfe8; }
+.dept-icon--sky svg { color: #fff; }
+.dept-icon--cyan { background: var(--cyan); color: var(--cyan); }
+.dept-icon--cyan svg { color: #fff; }
+.dept-icon--navy { background: #1a4f8c; color: #1a4f8c; }
+.dept-icon--navy svg { color: #fff; }
+.dept-icon--lime { background: var(--brand-accent); color: var(--brand-accent); }
+.dept-icon--lime svg { color: var(--navy); }
+.dept-card__mark {
+  pointer-events: none;
+  position: absolute;
+  right: -0.85rem;
+  top: 52%;
+  height: 8.4rem;
+  width: 8.4rem;
+  opacity: 0.12;
+  transform: translateY(-50%);
+}
+.dept-card--featured .dept-card__mark {
+  display: none;
+}
+.dept-arrow {
+  display: inline-flex;
+  height: 2.35rem;
+  width: 2.35rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, #fff 70%, var(--line));
+  background: color-mix(in srgb, #fff 82%, transparent);
+  color: var(--navy);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+html.dark .dept-arrow {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface) 80%, #fff);
+  color: var(--on-brand);
+}
+.dept-card:hover .dept-arrow {
+  transform: translateX(3px);
+}
+.dept-card--service {
+  min-height: 15.25rem;
+  height: 100%;
+  justify-content: flex-start;
+}
+.dept-card--service:hover,
+.dept-card--service:focus,
+.dept-card--service:focus-visible {
+  border-color: var(--cyan);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--cyan) 38%, transparent),
+    0 16px 36px color-mix(in srgb, var(--cyan) 16%, transparent);
+  outline: none;
+}
+.dept-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1.15rem;
+}
+.dept-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--cyan-ink);
+  transition: color 0.2s ease, gap 0.2s ease;
+}
+.dept-card--service:hover .dept-more,
+.dept-card--service:focus-visible .dept-more {
+  color: var(--cyan);
+}
+.dept-card--service .dept-arrow {
+  position: static;
+}
+.dept-impact {
+  display: none;
+  align-items: center;
+  gap: 1.1rem;
+  padding-left: 0.5rem;
+}
+@media (min-width: 900px) {
+  .dept-impact {
+    display: flex;
+  }
+}
+.dept-impact__stack {
+  position: relative;
+  height: 7rem;
+  width: 8.25rem;
+}
+.dept-impact__tile {
+  position: absolute;
+  height: 4.1rem;
+  width: 4.1rem;
+  border-radius: 1.15rem;
+  border: 1px solid color-mix(in srgb, #fff 62%, var(--cyan));
+  background: linear-gradient(145deg, color-mix(in srgb, #fff 78%, transparent), color-mix(in srgb, var(--cyan) 32%, transparent));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--cyan) 18%, transparent);
+}
+.dept-impact__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--cyan-ink);
+}
+.dept-impact__copy span:last-of-type {
+  color: var(--navy);
+}
+html.dark .dept-impact__copy span:last-of-type {
+  color: var(--on-brand);
+}
+.dept-impact__rule {
+  margin-top: 0.35rem;
+  height: 3px;
+  width: 1.6rem;
+  border-radius: 9999px;
+  background: var(--brand-accent);
+}
+.dept-foot {
+  margin-top: 1.75rem;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink-500) 80%, var(--cyan));
+}
+
 .icon-well {
   display: inline-flex;
   height: var(--icon-well-size);
