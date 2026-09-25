@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function ProjectGrid({ projects, onOpen, isDisabled }) {
   const gridVariants = {
@@ -45,9 +46,10 @@ export default function ProjectGrid({ projects, onOpen, isDisabled }) {
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/35 via-transparent to-transparent" />
             </div>
 
-            <div className="p-5">
-              <h3 className="text-lg font-bold text-ink-900">{p.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-ink-500">{p.subtitle}</p>
+            <div className="relative overflow-hidden p-5">
+              <CardWatermark topic={p} tone="navy" size="md" />
+              <h3 className="relative text-lg font-bold text-ink-900">{p.title}</h3>
+              <p className="relative mt-1 text-sm leading-relaxed text-ink-500">{p.subtitle}</p>
 
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xs font-medium text-ink-400">

@@ -3,18 +3,11 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { departmentVisual } from "./departmentVisuals";
+import { CardWatermark } from "@/components/illustrations";
 
-function ProductImpactArt() {
+function ProductImpactCopy() {
   return (
     <div className="dept-impact" aria-hidden>
-      <div className="dept-impact__stack">
-        <span className="dept-impact__tile" style={{ left: "0.15rem", top: "0.15rem", transform: "rotate(-14deg)" }} />
-        <span className="dept-impact__tile" style={{ left: "1.7rem", top: "0.85rem", transform: "rotate(10deg)" }} />
-        <span
-          className="dept-impact__tile"
-          style={{ left: "0.85rem", top: "2.05rem", transform: "rotate(-4deg)", opacity: 0.95 }}
-        />
-      </div>
       <div className="dept-impact__copy">
         <span>Ideas</span>
         <span>Products</span>
@@ -35,10 +28,16 @@ export default function DepartmentCard({
   const { Icon, tone } = departmentVisual(dept, index);
   const number = String(index + 1).padStart(2, "0");
   const className = `dept-card${featured ? " dept-card--featured" : ""}`;
+  const watermarkTone = tone === "navy" || tone === "lime" ? "navy" : "cyan";
 
   const body = (
     <>
-      <Icon className="dept-card__mark" strokeWidth={1.15} />
+      <CardWatermark
+        topic={dept}
+        tone={watermarkTone}
+        size={featured ? "lg" : "md"}
+        placement={featured ? "right" : "corner"}
+      />
       {featured ? (
         <>
           <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
@@ -64,7 +63,7 @@ export default function DepartmentCard({
           <span className="dept-arrow">
             <ArrowRight size={16} strokeWidth={2.2} />
           </span>
-          <ProductImpactArt />
+          <ProductImpactCopy />
         </>
       ) : (
         <>
@@ -76,9 +75,9 @@ export default function DepartmentCard({
               {number}
             </span>
           </div>
-          <h3 className="mt-5 text-[1.12rem] font-extrabold text-ink-900">{dept.name}</h3>
+          <h3 className="relative mt-5 text-[1.12rem] font-extrabold text-ink-900">{dept.name}</h3>
           {dept.description ? (
-            <p className="mt-1.5 max-w-[16.5rem] pr-10 text-[0.9rem] leading-relaxed text-ink-500">
+            <p className="relative mt-1.5 max-w-[16.5rem] pr-10 text-[0.9rem] leading-relaxed text-ink-500">
               {dept.description}
             </p>
           ) : null}

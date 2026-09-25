@@ -9,6 +9,7 @@ import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
 import { slugify } from "@/lib/slug";
 import { expertiseVisual } from "./expertiseVisuals";
+import { CardWatermark } from "@/components/illustrations";
 
 function serviceHref(service) {
   return `/services#service-tab-${slugify(service?.title)}`;
@@ -24,7 +25,7 @@ function ExpertiseCard({ service, index }) {
       className="dept-card dept-card--service"
       aria-label={`${service.title} — learn more`}
     >
-      <Icon className="dept-card__mark" strokeWidth={1.15} />
+      <CardWatermark topic={service} tone={index % 2 === 0 ? "cyan" : "navy"} size="md" />
       <div className="flex items-center gap-3">
         <span className="dept-icon dept-icon--cyan">
           <Icon size={20} strokeWidth={2.1} />
@@ -33,9 +34,9 @@ function ExpertiseCard({ service, index }) {
           {number}
         </span>
       </div>
-      <h3 className="mt-5 text-[1.12rem] font-extrabold text-ink-900">{service.title}</h3>
+      <h3 className="relative mt-5 text-[1.12rem] font-extrabold text-ink-900">{service.title}</h3>
       {service.description ? (
-        <p className="mt-1.5 max-w-[17rem] pr-2 text-[0.9rem] leading-relaxed text-ink-500">
+        <p className="relative mt-1.5 max-w-[17rem] pr-2 text-[0.9rem] leading-relaxed text-ink-500">
           {service.description}
         </p>
       ) : null}

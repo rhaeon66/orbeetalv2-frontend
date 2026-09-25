@@ -6,6 +6,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
 import { useGetPublishedClientsQuery } from "@/redux/features/cms/clientsApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function ClientSection({ surface = "bg-pale" }) {
   const { data: clients = [], isLoading, isError, refetch } =
@@ -57,6 +58,7 @@ export default function ClientSection({ surface = "bg-pale" }) {
             renderItem={(client) => {
               const card = (
                 <div className="showcase-carousel-card min-h-[11rem] items-center justify-center gap-3 px-5 pb-5 pt-2">
+                  <CardWatermark topic={client.name} motif="collaboration" tone="cyan" size="sm" />
                   <div className="showcase-media showcase-media--logo">
                     {client.logo ? (
                       <Image

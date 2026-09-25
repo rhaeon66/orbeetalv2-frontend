@@ -7,6 +7,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
 import { useGetPublishedProductsQuery } from "@/redux/features/cms/productsApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function ProductShowcase({ surface = "bg-pale" }) {
   const { data: products = [], isLoading, isError, refetch } =
@@ -66,10 +67,11 @@ export default function ProductShowcase({ surface = "bg-pale" }) {
                     />
                   ) : null}
                 </div>
-                <div className="flex flex-1 flex-col px-5 pb-5">
-                  <h3 className="text-lg font-bold sm:text-xl">{product.title}</h3>
+                <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5">
+                  <CardWatermark topic={product} tone="navy" size="md" />
+                  <h3 className="relative text-lg font-bold sm:text-xl">{product.title}</h3>
                   {product.description ? (
-                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed">
+                    <p className="relative mt-2 line-clamp-3 text-sm leading-relaxed">
                       {product.description}
                     </p>
                   ) : null}

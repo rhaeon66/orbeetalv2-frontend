@@ -8,6 +8,7 @@ import Reveal from "@/components/ui/Reveal";
 import { fadeUp, stagger, viewportOnce } from "@/components/ui/motion";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 const HIGHLIGHT_ICONS = [Sparkles, ShieldCheck, Rocket];
 
@@ -98,12 +99,13 @@ export default function AboutSection({ surface = "bg-cream" }) {
                       variants={fadeUp}
                       className="card p-3.5"
                     >
+                      <CardWatermark topic={`${label} ${text || ""}`} tone="cyan" size="sm" />
                       <span className="icon-well h-9 w-9">
                         <Icon size={16} />
                       </span>
-                      <p className="mt-2.5 text-sm font-semibold text-ink-900">{label}</p>
+                      <p className="relative mt-2.5 text-sm font-semibold text-ink-900">{label}</p>
                       {text ? (
-                        <p className="mt-1 text-xs leading-relaxed text-ink-500">{text}</p>
+                        <p className="relative mt-1 text-xs leading-relaxed text-ink-500">{text}</p>
                       ) : null}
                     </motion.li>
                   );

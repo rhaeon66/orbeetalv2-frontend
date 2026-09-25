@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { ExternalLink, X } from "lucide-react";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function ProjectModal({ project, onClose }) {
   const closeRef = useRef(null);
@@ -70,7 +71,8 @@ export default function ProjectModal({ project, onClose }) {
               </button>
 
               <div className="grid overflow-y-auto md:grid-cols-2">
-                <div className="space-y-5 p-6 sm:p-8">
+                <div className="card-watermark-stage space-y-5 p-6 sm:p-8">
+                  <CardWatermark topic={project} tone="navy" size="lg" />
                   <div className="flex items-start gap-4 pr-10">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line bg-surface-muted">
                       <Image

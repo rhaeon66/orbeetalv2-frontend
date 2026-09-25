@@ -5,6 +5,7 @@ import { ChevronDown, Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { useGetPublishedFaqsQuery } from "@/redux/features/cms/faqsApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function FAQSection({ surface = "bg-sage" }) {
   const { data: faqs = [], isLoading, isError, refetch } = useGetPublishedFaqsQuery();
@@ -62,6 +63,7 @@ export default function FAQSection({ surface = "bg-sage" }) {
                     open ? "border-primary/30" : ""
                   }`}
                 >
+                  <CardWatermark topic={faq.question} tone="navy" size="sm" />
                   <button
                     type="button"
                     id={buttonId}

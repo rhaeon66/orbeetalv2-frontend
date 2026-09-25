@@ -29,19 +29,45 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
+function requestMethod(args) {
+  return (typeof args === "string" ? "GET" : args.method || "GET").toUpperCase();
+}
+
+function isUnsafe(method) {
+  return !["GET", "HEAD", "OPTIONS"].includes(method);
+}
+
+function isCsrfFailure(error) {
+  const detail = error?.data?.detail;
+  return error?.status === 403 && typeof detail === "string" && detail.startsWith("CSRF Failed");
+}
+
+async function primeCsrf(api, extraOptions) {
+  const csrf = await rawBaseQuery({ url: "api/auth/csrf/" }, api, extraOptions);
+  if (csrf.data?.csrfToken) setCsrfToken(csrf.data.csrfToken);
+  return csrf;
+}
+
 async function baseQuery(args, api, extraOptions) {
-  const method = (
-    typeof args === "string" ? "GET" : args.method || "GET"
-  ).toUpperCase();
-  if (!["GET", "HEAD", "OPTIONS"].includes(method) && !csrfToken) {
-    const csrf = await rawBaseQuery(
-      { url: "api/auth/csrf/" },
-      api,
-      extraOptions
-    );
-    if (csrf.data?.csrfToken) setCsrfToken(csrf.data.csrfToken);
+  const method = requestMethod(args);
+  if (isUnsafe(method) && !csrfToken) {
+    const primed = await primeCsrf(api, extraOptions);
+    if (!csrfToken) return primed;
   }
-  return rawBaseQuery(args, api, extraOptions);
+
+  let result = await rawBaseQuery(args, api, extraOptions);
+  if (result.data?.csrfToken) setCsrfToken(result.data.csrfToken);
+
+  // login() rotates the cookie. A token cached before that no longer matches.
+  if (isUnsafe(method) && !extraOptions?.csrfRetried && isCsrfFailure(result.error)) {
+    setCsrfToken("");
+    const primed = await primeCsrf(api, extraOptions);
+    if (!csrfToken) return primed;
+    result = await rawBaseQuery(args, api, { ...extraOptions, csrfRetried: true });
+    if (result.data?.csrfToken) setCsrfToken(result.data.csrfToken);
+  }
+
+  return result;
 }
 
 export const apiSlice = createApi({

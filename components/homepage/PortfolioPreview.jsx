@@ -7,6 +7,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
 import { useGetPublishedProjectsQuery } from "@/redux/features/cms/projectsApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function PortfolioPreview({ surface = "bg-cream" }) {
   const { data: projects = [], isLoading, isError, refetch } =
@@ -66,10 +67,11 @@ export default function PortfolioPreview({ surface = "bg-cream" }) {
                       />
                     ) : null}
                   </div>
-                  <div className="flex flex-1 flex-col px-5 pb-5">
-                    <h3 className="text-lg font-bold">{title}</h3>
+                  <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5">
+                    <CardWatermark topic={project} tone="cyan" size="md" />
+                    <h3 className="relative text-lg font-bold">{title}</h3>
                     {summary ? (
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed">
+                      <p className="relative mt-2 line-clamp-3 text-sm leading-relaxed">
                         {summary}
                       </p>
                     ) : null}

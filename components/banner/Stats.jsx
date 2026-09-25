@@ -2,36 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
-import { User, Users, Check, CheckCircle2, BarChart3, Loader2 } from "lucide-react";
+import { User, CheckCircle2, BarChart3, Loader2 } from "lucide-react";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import { fadeUp, stagger, viewportOnce } from "@/components/ui/motion";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 const STAT_THEMES = [
-  {
-    WellIcon: User,
-    MarkIcon: Users,
-    well: "icon-well-solid",
-    wash: "bg-primary/16",
-    mark: "text-primary",
-    suffix: "text-cyan",
-  },
-  {
-    WellIcon: CheckCircle2,
-    MarkIcon: Check,
-    well: "icon-well-cyan",
-    wash: "bg-cyan/20",
-    mark: "text-cyan",
-    suffix: "text-cyan",
-  },
-  {
-    WellIcon: BarChart3,
-    MarkIcon: BarChart3,
-    well: "icon-well-accent",
-    wash: "bg-accent/20",
-    mark: "text-accent",
-    suffix: "text-accent",
-  },
+  { WellIcon: User, well: "icon-well-solid", suffix: "text-cyan" },
+  { WellIcon: CheckCircle2, well: "icon-well-cyan", suffix: "text-cyan" },
+  { WellIcon: BarChart3, well: "icon-well-accent", suffix: "text-accent" },
 ];
 
 function StatNumber({ value }) {
@@ -113,23 +93,18 @@ export default function Stats({ surface = "bg-pale" }) {
           {stats.map(({ suffix, label, description, value }, i) => {
             const theme = STAT_THEMES[i % STAT_THEMES.length];
             const WellIcon = theme.WellIcon;
-            const MarkIcon = theme.MarkIcon;
             return (
               <motion.div
                 key={`${label}-${i}`}
                 variants={fadeUp}
                 className="card relative flex h-full min-h-[11.5rem] flex-col overflow-hidden p-5 sm:p-6"
               >
-                <span
-                  aria-hidden
-                  className={`pointer-events-none absolute -right-8 top-1/2 flex size-40 -translate-y-1/2 items-center justify-center rounded-full ${theme.wash}`}
-                >
-                  <MarkIcon
-                    size={36}
-                    strokeWidth={1.75}
-                    className={`opacity-35 ${theme.mark}`}
-                  />
-                </span>
+                <CardWatermark
+                  topic={`${label} ${description || ""}`}
+                  tone={i === 1 ? "cyan" : "navy"}
+                  size="md"
+                  placement="right"
+                />
                 <div className="relative z-[1] flex h-full min-h-0 flex-col pr-12 sm:pr-14">
                   <span className={`icon-well ${theme.well}`}>
                     <WellIcon size={20} strokeWidth={2.2} />

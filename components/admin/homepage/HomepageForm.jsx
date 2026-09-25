@@ -44,7 +44,7 @@ const EMPTY = {
   method_title: "",
   method_highlight: "",
   method_subtitle: "",
-  method_steps: [{ title: "", desc: "" }],
+  method_steps: [{ title: "", desc: "", points: "" }],
   expertise_eyebrow: "",
   expertise_title: "",
   expertise_highlight: "",
@@ -77,7 +77,13 @@ function homepageValues(data) {
     method_title: data.method_title || "",
     method_highlight: data.method_highlight || "",
     method_subtitle: data.method_subtitle || "",
-    method_steps: withFallback(data.method_steps, EMPTY.method_steps[0]),
+    method_steps: withFallback(
+      data.method_steps?.map((item) => ({
+        ...item,
+        points: Array.isArray(item.points) ? item.points.join("\n") : item.points || "",
+      })),
+      EMPTY.method_steps[0]
+    ),
     expertise_eyebrow: data.expertise_eyebrow || "",
     expertise_title: data.expertise_title || "",
     expertise_highlight: data.expertise_highlight || "",
@@ -145,6 +151,13 @@ export default function HomepageForm() {
         ...item,
         value: Number(item.value) || 0,
         featured: Boolean(item.featured),
+      })),
+      method_steps: values.method_steps.map((item) => ({
+        ...item,
+        points: String(item.points || "")
+          .split("\n")
+          .map((point) => point.trim())
+          .filter(Boolean),
       })),
     };
     for (const key of ["about_image", "why_image"]) {
@@ -503,6 +516,15 @@ export default function HomepageForm() {
                   rows={2}
                   placeholder="Description"
                 />
+                <textarea
+                  value={item.points}
+                  onChange={(event) =>
+                    updateList("method_steps", index, "points", event.target.value)
+                  }
+                  className={ADMIN_INPUT}
+                  rows={4}
+                  placeholder="Bullet points, one per line"
+                />
                 {values.method_steps.length > 1 && (
                   <button
                     type="button"
@@ -516,7 +538,7 @@ export default function HomepageForm() {
             ))}
             <button
               type="button"
-              onClick={() => addListItem("method_steps", { title: "", desc: "" })}
+              onClick={() => addListItem("method_steps", { title: "", desc: "", points: "" })}
               className="btn btn-ghost btn-sm"
             >
               <Plus size={14} aria-hidden />

@@ -1,36 +1,33 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { EASE, fadeUp, stagger } from "@/components/ui/motion";
+import { fadeUp, stagger, viewportOnce } from "@/components/ui/motion";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
-
-function pad(index) {
-  return String(index + 1).padStart(2, "0");
-}
+import { resolveMethodSteps } from "./methodSteps";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function WhatWeDo({ surface = "bg-cream" }) {
   const { data, isLoading, isError, refetch } = useGetPublishedHomepageQuery();
   const methodology = data?.methodology;
-  const steps = methodology?.steps || [];
+  const steps = resolveMethodSteps(methodology?.steps);
   const reduce = useReducedMotion();
-  const lineRef = useRef(null);
-  const inView = useInView(lineRef, { once: true, amount: 0.25 });
-  const showLine = reduce || inView;
+  const [active, setActive] = useState(0);
 
   return (
-    <section className={`section ${surface}`}>
+    <section className={`section method-section ${surface}`}>
       <SectionShell>
         <SectionHeading
           eyebrow={methodology?.eyebrow || "How We Work"}
           title={
             <>
-              {methodology?.title || "Our IT"}{" "}
+              {methodology?.title || "Our"}{" "}
               <span className="text-gradient">
-                {methodology?.highlight || "Methodology"}
+                {methodology?.highlight || "IT Methodology"}
               </span>
             </>
           }
@@ -57,75 +54,53 @@ export default function WhatWeDo({ surface = "bg-cream" }) {
         )}
 
         {steps.length > 0 && (
-          <div ref={lineRef} className="section-stack">
-            <div className="relative hidden lg:block">
-              <div className="absolute left-[8%] right-[8%] top-5 h-px overflow-hidden bg-line">
-                <motion.div
-                  className="h-full origin-left bg-cyan"
-                  initial={{ scaleX: reduce ? 1 : 0 }}
-                  animate={{ scaleX: showLine ? 1 : 0 }}
-                  transition={{ duration: reduce ? 0 : 0.9, ease: EASE }}
-                />
-              </div>
-
-              <motion.ol
-                className="relative grid grid-cols-4 gap-6"
-                initial={reduce ? false : "hidden"}
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                variants={stagger(0.15, 0.16)}
-              >
-                {steps.map(({ title, desc }, index) => (
+          <div className="method-scroller section-stack">
+            <motion.ol
+              className="method-track"
+              initial={reduce ? false : "hidden"}
+              whileInView="visible"
+              viewport={viewportOnce}
+              variants={stagger(0.08, 0.08)}
+              onMouseLeave={() => setActive(0)}
+            >
+              {steps.map((step, index) => {
+                const Icon = step.Icon;
+                const number = String(index + 1).padStart(2, "0");
+                const isActive = active === index;
+                return (
                   <motion.li
-                    key={`${title}-${index}`}
+                    key={`${step.title}-${index}`}
                     variants={fadeUp}
-                    className="flex flex-col items-center px-2 text-center"
+                    className={`method-step${isActive ? " is-active" : ""}`}
+                    onMouseEnter={() => setActive(index)}
+                    onFocus={() => setActive(index)}
                   >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-surface text-xs font-extrabold tracking-wide text-primary">
-                      {pad(index)}
-                    </span>
-                    <h3 className="mt-5 text-base font-bold text-ink-900">{title}</h3>
-                    <p className="mt-2 max-w-[16rem] text-sm leading-relaxed text-ink-500">
-                      {desc}
-                    </p>
+                    <span className="method-num">{number}</span>
+                    <Link
+                      href="/contact"
+                      className="method-card"
+                      aria-label={`${step.title} — learn more`}
+                    >
+                      <CardWatermark topic={step} tone={index % 2 === 0 ? "cyan" : "navy"} size="sm" />
+                      <span className="dept-icon dept-icon--cyan">
+                        <Icon size={18} strokeWidth={2.15} />
+                      </span>
+                      <h3 className="method-card__title">{step.title}</h3>
+                      <span className="method-card__rule" aria-hidden />
+                      <ul className="method-card__list">
+                        {step.points.map((point) => (
+                          <li key={point}>{point}</li>
+                        ))}
+                      </ul>
+                      <span className="method-card__more">
+                        Learn more
+                        <ArrowRight size={14} strokeWidth={2.4} />
+                      </span>
+                    </Link>
                   </motion.li>
-                ))}
-              </motion.ol>
-            </div>
-
-            <div className="relative lg:hidden">
-              <div className="absolute bottom-4 left-5 top-4 w-px overflow-hidden bg-line">
-                <motion.div
-                  className="h-full w-full origin-top bg-cyan"
-                  initial={{ scaleY: reduce ? 1 : 0 }}
-                  animate={{ scaleY: showLine ? 1 : 0 }}
-                  transition={{ duration: reduce ? 0 : 0.9, ease: EASE }}
-                />
-              </div>
-              <motion.ol
-                className="relative flex flex-col gap-8"
-                initial={reduce ? false : "hidden"}
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                variants={stagger(0.12, 0.14)}
-              >
-                {steps.map(({ title, desc }, index) => (
-                  <motion.li
-                    key={`${title}-${index}`}
-                    variants={fadeUp}
-                    className="flex gap-4"
-                  >
-                    <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-surface text-xs font-extrabold tracking-wide text-primary">
-                      {pad(index)}
-                    </span>
-                    <div className="pt-1">
-                      <h3 className="text-base font-bold text-ink-900">{title}</h3>
-                      <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{desc}</p>
-                    </div>
-                  </motion.li>
-                ))}
-              </motion.ol>
-            </div>
+                );
+              })}
+            </motion.ol>
           </div>
         )}
       </SectionShell>

@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { SERVICE_EDGE } from "@/lib/site";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function ServicesEdge({ surface = "bg-cream" }) {
   return (
@@ -21,10 +22,11 @@ export default function ServicesEdge({ surface = "bg-cream" }) {
         <ul className="section-stack mx-auto grid max-w-3xl gap-3">
           {SERVICE_EDGE.map((item) => (
             <li key={item} className="card flex items-start gap-3 p-4">
+              <CardWatermark topic={item} tone="navy" size="sm" />
               <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
                 <Check size={14} strokeWidth={3} />
               </span>
-              <p className="text-[15px] font-semibold text-ink-800">{item}</p>
+              <p className="relative text-[15px] font-semibold text-ink-800">{item}</p>
             </li>
           ))}
         </ul>

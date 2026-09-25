@@ -7,6 +7,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { EASE, fadeRight, scaleIn, stagger, viewportOnce } from "@/components/ui/motion";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 function FeatureRow({ service }) {
   const reduce = useReducedMotion();
@@ -17,6 +18,7 @@ function FeatureRow({ service }) {
       transition={{ duration: 0.22, ease: EASE }}
       className="card group flex items-start gap-3.5 p-4 transition-colors duration-200 hover:border-cyan/50"
     >
+      <CardWatermark topic={service} tone="cyan" size="sm" />
       <span className="icon-well transition-colors duration-200 group-hover:bg-accent-light">
         {service.icon ? (
           <Image
@@ -28,13 +30,13 @@ function FeatureRow({ service }) {
           />
         ) : null}
       </span>
-      <div className="min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1">
         <h3 className="text-[0.95rem] font-semibold text-ink-900">{service.title}</h3>
         <p className="mt-1 text-sm leading-relaxed text-ink-500">{service.description}</p>
       </div>
       <ArrowRight
         size={16}
-        className="mt-1 shrink-0 text-ink-400 transition-transform duration-200 group-hover:translate-x-[3px] group-hover:text-cyan-ink"
+        className="relative z-[1] mt-1 shrink-0 text-ink-400 transition-transform duration-200 group-hover:translate-x-[3px] group-hover:text-cyan-ink"
         aria-hidden
       />
     </motion.div>

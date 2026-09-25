@@ -6,6 +6,7 @@ import { useGetPublishedTestimonialsQuery } from "@/redux/features/cms/testimoni
 import SectionHeading from "@/components/ui/SectionHeading";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function TestimonialsSlider({ surface = "bg-cream" }) {
   const { data: testimonials = [], isLoading, isError, refetch } =
@@ -55,6 +56,7 @@ export default function TestimonialsSlider({ surface = "bg-cream" }) {
             size="wide"
             renderItem={(quote) => (
               <article className="showcase-carousel-card relative px-6 pb-6 pt-5 sm:px-8 sm:pb-7">
+                <CardWatermark topic="client collaboration" tone="cyan" size="sm" />
                 <span className="absolute right-6 top-4 select-none font-serif text-6xl leading-none text-primary/20">
                   ”
                 </span>

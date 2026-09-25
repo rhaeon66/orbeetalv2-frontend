@@ -9,6 +9,7 @@ import { useGetPublishedTeamQuery } from "@/redux/features/cms/teamApi";
 import { slugify } from "@/lib/slug";
 import { pageSurface } from "@/lib/surfaces";
 import SectionShell from "@/components/layouts/SectionShell";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function TeamProfilePage() {
   const { slug } = useParams();
@@ -81,14 +82,17 @@ export default function TeamProfilePage() {
 
               <div className="mt-8 grid grid-cols-3 gap-3">
                 <div className="card p-4 text-center">
+                  <CardWatermark topic="experience growth" tone="navy" size="sm" />
                   <p className="text-2xl font-extrabold text-ink-900">{member.experience}+</p>
                   <p className="mt-1 text-xs font-semibold text-ink-500">Years Exp.</p>
                 </div>
                 <div className="card p-4 text-center">
+                  <CardWatermark topic="projects workflow" tone="cyan" size="sm" />
                   <p className="text-2xl font-extrabold text-ink-900">{member.projects}+</p>
                   <p className="mt-1 text-xs font-semibold text-ink-500">Projects</p>
                 </div>
                 <div className="card p-4 text-center">
+                  <CardWatermark topic={member.expertise?.join(" ") || "expertise"} tone="navy" size="sm" />
                   <p className="text-2xl font-extrabold text-ink-900">
                     {member.expertise?.length || 0}
                   </p>
@@ -114,7 +118,8 @@ export default function TeamProfilePage() {
 
               {member.department && (
                 <div className="card mt-8 p-6">
-                  <h2 className="text-lg font-bold text-ink-900">Department Role</h2>
+                  <CardWatermark topic={member.department} tone="cyan" size="md" />
+                  <h2 className="relative text-lg font-bold text-ink-900">Department Role</h2>
                   {member.department.description ? (
                     <p className="mt-2 text-sm leading-relaxed text-ink-500">
                       {member.department.description}

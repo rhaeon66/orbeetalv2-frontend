@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, ChevronDown, Loader2, Send } from "lucide-react";
 import { useSubmitInquiryMutation } from "@/redux/features/contact/contactApi";
 import { useGetPublishedServicesQuery } from "@/redux/features/cms/servicesApi";
+import { CardWatermark } from "@/components/illustrations";
 
 const FALLBACK_SERVICES = [
   "Software Development",
@@ -120,6 +121,7 @@ export default function ContactRight() {
 
   return (
     <div className="card relative overflow-hidden p-6 shadow-[var(--shadow-md)] sm:p-8 lg:p-10">
+      <CardWatermark topic="contact quote" tone="cyan" size="md" />
       <div className="relative">
         <h3 className="text-xl font-extrabold text-ink-900">Request a free quote</h3>
         <p className="mt-1.5 text-sm text-ink-500">

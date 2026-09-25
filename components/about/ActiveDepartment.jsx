@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Check, Rocket, X } from "lucide-react";
+import { CardWatermark } from "@/components/illustrations";
 
 export default function ActiveDepartment({ department, onClose }) {
   return (
@@ -12,10 +13,11 @@ export default function ActiveDepartment({ department, onClose }) {
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="card relative mx-auto section-stack max-w-4xl overflow-hidden px-5 py-8 sm:px-10 sm:py-12"
     >
+      <CardWatermark topic={department} tone="cyan" size="lg" placement="right" />
       <button
         type="button"
         onClick={onClose}
-        className="icon-btn absolute right-4 top-4 h-10 w-10"
+        className="icon-btn absolute right-4 top-4 z-10 h-10 w-10"
         aria-label="Close department details"
       >
         <X size={18} />

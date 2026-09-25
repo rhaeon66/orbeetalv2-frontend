@@ -1,6 +1,7 @@
 import { FaFacebook, FaLinkedin, FaWhatsapp } from "react-icons/fa";
 import { FiMail } from "react-icons/fi";
 import { SITE } from "@/lib/site";
+import { CardWatermark } from "@/components/illustrations";
 
 const CHANNELS = [
   {
@@ -40,6 +41,7 @@ export default function ContactChannels() {
             rel={href.startsWith("http") ? "noreferrer" : undefined}
             className="card flex items-center gap-3 p-4 transition hover:border-cyan/45"
           >
+            <CardWatermark topic={label} tone="navy" size="sm" />
             <span className="icon-well">
               <Icon size={18} />
             </span>

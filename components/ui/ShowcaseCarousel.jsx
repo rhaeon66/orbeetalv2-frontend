@@ -1,24 +1,15 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { motion, useReducedMotion, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { EASE } from "@/components/ui/motion";
 import { useShowcaseCarousel, wrapIndex } from "@/hooks/useShowcaseCarousel";
 
 const OFFSETS = [-2, -1, 0, 1, 2];
 
-function emphasis(offset) {
-  const abs = Math.abs(offset);
-  const scale = abs === 0 ? 1 : abs === 1 ? 0.94 : 0.88;
-  const opacity = abs === 0 ? 1 : abs === 1 ? 0.82 : 0.72;
-  return { scaleX: scale, scaleY: scale, opacity };
-}
-
-function depthClass(offset) {
-  const abs = Math.abs(offset);
-  if (abs === 0) return "is-center";
-  if (abs === 1) return "is-adjacent";
+function depthClass(distance) {
+  if (distance < 0.5) return "is-center";
+  if (distance < 1.5) return "is-adjacent";
   return "is-far";
 }
 
@@ -29,6 +20,64 @@ function readGap(root) {
     return parseFloat(raw) * rem;
   }
   return parseFloat(raw) || 16;
+}
+
+function ShowcaseSlide({
+  logical,
+  item,
+  progress,
+  step,
+  count,
+  reduce,
+  renderItem,
+  onSelect,
+}) {
+  const stepRef = useRef(step);
+  stepRef.current = step;
+  const x = useTransform(progress, (value) => (logical - value) * stepRef.current);
+  const scale = useTransform(progress, (value) => {
+    const abs = Math.abs(logical - value);
+    if (abs <= 1) return 1 - abs * 0.06;
+    return 0.94 - Math.min(abs - 1, 1) * 0.06;
+  });
+  const opacity = useTransform(progress, (value) => {
+    const abs = Math.abs(logical - value);
+    if (abs <= 1) return 1 - abs * 0.18;
+    return 0.82 - Math.min(abs - 1, 1) * 0.1;
+  });
+  const zIndex = useTransform(progress, (value) => 10 - Math.abs(logical - value));
+  const [band, setBand] = useState(() => depthClass(Math.abs(logical - progress.get())));
+  const isCenter = band === "is-center";
+
+  useEffect(() => {
+    const sync = (value) => setBand(depthClass(Math.abs(logical - value)));
+    sync(progress.get());
+    return progress.on("change", sync);
+  }, [logical, progress]);
+
+  return (
+    <motion.div
+      className={`showcase-carousel-slide ${band}`}
+      style={{ x, scaleX: scale, scaleY: scale, opacity, zIndex }}
+      aria-hidden={!isCenter}
+    >
+      <motion.div
+        className="h-auto"
+        whileHover={isCenter && !reduce ? { y: -5 } : undefined}
+        transition={{ duration: 0.28 }}
+        onClick={
+          !isCenter && count > 1
+            ? (event) => {
+                if (event.target.closest("a, button")) return;
+                onSelect(logical);
+              }
+            : undefined
+        }
+      >
+        {renderItem(item, { active: isCenter })}
+      </motion.div>
+    </motion.div>
+  );
 }
 
 export default function ShowcaseCarousel({
@@ -43,7 +92,8 @@ export default function ShowcaseCarousel({
   const count = items.length;
   const {
     rootRef,
-    index,
+    progress,
+    base,
     active,
     next,
     prev,
@@ -84,29 +134,27 @@ export default function ShowcaseCarousel({
     observer.observe(root);
     root.querySelectorAll(".showcase-carousel-slide").forEach((slide) => observer.observe(slide));
     return () => observer.disconnect();
-  }, [count, rootRef, size, index]);
+  }, [count, rootRef, size, base]);
 
   const slots = useMemo(() => {
     if (!count) return [];
     const offsets = count < 2 ? [0] : OFFSETS;
     return offsets.map((offset) => {
-      const logical = index + offset;
+      const logical = base + offset;
       const item = items[wrapIndex(logical, count)];
-      return { offset, logical, item };
+      return { offset, logical, item, key: `${getKey(item)}-${logical}` };
     });
-  }, [count, index, items]);
+  }, [base, count, getKey, items]);
 
   if (!count) return null;
-
-  const duration = reduce ? 0.18 : 0.55;
 
   return (
     <div
       ref={rootRef}
       className={`showcase-carousel showcase-carousel--${size}${count < 2 ? " showcase-carousel--solo" : ""} ${className}`.trim()}
-      onMouseEnter={onPointerEnter}
-      onMouseLeave={onPointerLeave}
-      onFocusCapture={onPointerEnter}
+      onFocusCapture={(event) => {
+        if (event.target.closest(".showcase-carousel-slide")) onPointerEnter();
+      }}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) onPointerLeave();
       }}
@@ -139,48 +187,25 @@ export default function ShowcaseCarousel({
       <div
         className="showcase-carousel-viewport"
         style={trackHeight ? { minHeight: trackHeight } : undefined}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
       >
-        {slots.map(({ offset, logical, item }) => {
-          const key = `${getKey(item)}-${logical}`;
-          const { scaleX, scaleY, opacity } = emphasis(offset);
-          const isCenter = offset === 0;
-          return (
-            <motion.div
-              key={key}
-              className={`showcase-carousel-slide ${depthClass(offset)}`}
-              initial={false}
-              animate={{
-                x: offset * step,
-                scaleX,
-                scaleY,
-                opacity,
-                y: 0,
-                zIndex: 10 - Math.abs(offset),
-              }}
-              whileHover={
-                isCenter && !reduce
-                  ? { scaleX: 1.015, scaleY: 1.015, y: -5 }
-                  : undefined
-              }
-              transition={{ duration, ease: EASE }}
-              aria-hidden={!isCenter}
-            >
-              <div
-                className="h-auto"
-                onClick={
-                  !isCenter && count > 1
-                    ? (event) => {
-                        if (event.target.closest("a, button")) return;
-                        goBy(offset, true);
-                      }
-                    : undefined
-                }
-              >
-                {renderItem(item, { active: isCenter, offset })}
-              </div>
-            </motion.div>
-          );
-        })}
+        {slots.map(({ logical, item, key }) => (
+          <ShowcaseSlide
+            key={key}
+            logical={logical}
+            item={item}
+            progress={progress}
+            step={step}
+            count={count}
+            reduce={reduce}
+            renderItem={renderItem}
+            onSelect={(logical) => {
+              const delta = logical - Math.round(progress.get());
+              if (delta) goBy(delta, true);
+            }}
+          />
+        ))}
       </div>
 
       {count > 1 && (

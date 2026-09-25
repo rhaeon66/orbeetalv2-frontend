@@ -9,6 +9,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { useGetPublishedServicesQuery } from "@/redux/features/cms/servicesApi";
 import SectionShell from "@/components/layouts/SectionShell";
 import { slugify } from "@/lib/slug";
+import { CardWatermark } from "@/components/illustrations";
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -130,10 +131,11 @@ export default function ServicesSection({ surface = "bg-pale" }) {
                   <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {(activeService.content || []).map((point) => (
                       <li key={point} className="card flex items-start gap-3 p-4">
+                        <CardWatermark topic={activeService} tone="cyan" size="sm" />
                         <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
                           <Check size={14} strokeWidth={3} />
                         </span>
-                        <p className="text-[15px] leading-relaxed text-ink-700">{point}</p>
+                        <p className="relative text-[15px] leading-relaxed text-ink-700">{point}</p>
                       </li>
                     ))}
                   </ul>

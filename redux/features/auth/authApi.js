@@ -28,20 +28,24 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     login: builder.mutation({
       async queryFn(credentials, _api, _extra, baseQuery) {
-        return withCsrf(baseQuery, {
+        const result = await withCsrf(baseQuery, {
           url: "api/auth/login/",
           method: "POST",
           body: credentials,
         });
+        if (result.data?.csrfToken) setCsrfToken(result.data.csrfToken);
+        return result;
       },
       invalidatesTags: ["Auth", "Dashboard"],
     }),
     logout: builder.mutation({
       async queryFn(_arg, _api, _extra, baseQuery) {
-        return withCsrf(baseQuery, {
+        const result = await withCsrf(baseQuery, {
           url: "api/auth/logout/",
           method: "POST",
         });
+        if (result.data?.csrfToken) setCsrfToken(result.data.csrfToken);
+        return result;
       },
       invalidatesTags: ["Auth", "Dashboard"],
     }),

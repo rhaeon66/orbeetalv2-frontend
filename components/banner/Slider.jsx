@@ -16,8 +16,8 @@ import HeroVisual from "@/components/banner/hero/HeroVisual";
 import TrustRow from "@/components/banner/hero/TrustRow";
 import SectionShell from "@/components/layouts/SectionShell";
 
-const SLIDE_DURATION = 6000;
-const INTERACT_RESUME = 8000;
+const SLIDE_DURATION = 5500;
+const INTERACT_RESUME = 4000;
 
 export default function BannerSlider({ surface = "bg-sage" }) {
   const reduceMotion = useReducedMotion();
@@ -31,9 +31,10 @@ export default function BannerSlider({ surface = "bg-sage" }) {
   const [hovered, setHovered] = useState(false);
   const [interacted, setInteracted] = useState(false);
   const [compact, setCompact] = useState(false);
+  const [pageHidden, setPageHidden] = useState(false);
   const resumeRef = useRef(null);
   const count = slides.length;
-  const paused = hovered || interacted;
+  const paused = hovered || interacted || pageHidden;
 
   const markInteract = useCallback(() => {
     setInteracted(true);
@@ -70,6 +71,13 @@ export default function BannerSlider({ surface = "bg-sage" }) {
     apply();
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    const onVis = () => setPageHidden(document.hidden);
+    onVis();
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
   useEffect(() => {
@@ -127,7 +135,9 @@ export default function BannerSlider({ surface = "bg-sage" }) {
       className={`relative overflow-hidden ${surface}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocusCapture={() => setHovered(true)}
+      onFocusCapture={(event) => {
+        if (event.target.closest("a, input, textarea, select")) setHovered(true);
+      }}
       onBlurCapture={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false);
       }}
