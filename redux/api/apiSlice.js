@@ -43,14 +43,19 @@ function isCsrfFailure(error) {
 }
 
 async function primeCsrf(api, extraOptions) {
-  const csrf = await rawBaseQuery({ url: "api/auth/csrf/" }, api, extraOptions);
+  const csrf = await rawBaseQuery(
+    { url: `api/auth/csrf/?t=${Date.now()}`, cache: "no-store" },
+    api,
+    extraOptions
+  );
   if (csrf.data?.csrfToken) setCsrfToken(csrf.data.csrfToken);
   return csrf;
 }
 
 async function baseQuery(args, api, extraOptions) {
   const method = requestMethod(args);
-  if (isUnsafe(method) && !csrfToken) {
+  // Always read the current cookie secret. The in-memory token is stale after login().
+  if (isUnsafe(method) && !extraOptions?.skipCsrfPrime) {
     const primed = await primeCsrf(api, extraOptions);
     if (!csrfToken) return primed;
   }
