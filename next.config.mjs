@@ -2,7 +2,7 @@ import withPWAInit from "next-pwa";
 
 function mediaRemotePattern() {
   try {
-    const url = new URL(process.env.SERVER || "http://localhost:8000");
+    const url = new URL(process.env.SERVER || "http://localhost:8888");
     const pattern = {
       protocol: url.protocol.replace(":", ""),
       hostname: url.hostname,
@@ -14,7 +14,7 @@ function mediaRemotePattern() {
     return {
       protocol: "http",
       hostname: "localhost",
-      port: "8000",
+      port: "8888",
       pathname: "/media/**",
     };
   }
@@ -24,7 +24,7 @@ function mediaRemotePattern() {
 const baseConfig = {
   turbopack: {},
   env: {
-    SERVER: process.env.SERVER || "http://localhost:8000",
+    SERVER: process.env.SERVER || "http://localhost:8888",
   },
   images: {
     remotePatterns: [
@@ -32,7 +32,7 @@ const baseConfig = {
       {
         protocol: "http",
         hostname: "127.0.0.1",
-        port: "8000",
+        port: "8888",
         pathname: "/media/**",
       },
     ],

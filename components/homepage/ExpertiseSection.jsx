@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -18,26 +19,79 @@ function serviceHref(service) {
 function ExpertiseCard({ service, index }) {
   const Icon = expertiseVisual(service);
   const number = String(index + 1).padStart(2, "0");
+  const text = service.description || "";
+  const reduce = useReducedMotion();
+  const [open, setOpen] = useState(false);
+  const [count, setCount] = useState(0);
+  const pointerType = useRef("mouse");
+
+  useEffect(() => {
+    if (!open) {
+      setCount(0);
+      return;
+    }
+    if (reduce || !text) {
+      setCount(text.length);
+      return;
+    }
+    setCount(0);
+    const id = window.setInterval(() => {
+      setCount((current) => {
+        if (current >= text.length) {
+          window.clearInterval(id);
+          return current;
+        }
+        return current + 1;
+      });
+    }, 16);
+    return () => window.clearInterval(id);
+  }, [open, reduce, text]);
+
+  const shown = text.slice(0, count);
+  const typing = open && count < text.length;
 
   return (
     <Link
       href={serviceHref(service)}
-      className="dept-card dept-card--service"
+      className={`dept-card dept-card--service${open ? " is-open" : ""}`}
       aria-label={`${service.title} — learn more`}
+      onPointerDown={(event) => {
+        pointerType.current = event.pointerType;
+      }}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") setOpen(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") setOpen(false);
+      }}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onClick={(event) => {
+        if (pointerType.current !== "mouse" && !open) {
+          event.preventDefault();
+          setOpen(true);
+        }
+      }}
     >
       <CardWatermark topic={service} tone={index % 2 === 0 ? "cyan" : "navy"} size="md" />
-      <div className="flex items-center gap-3">
-        <span className="dept-icon dept-icon--cyan">
+      <div className="relative flex items-center gap-3">
+        <span className="dept-icon dept-icon--cyan shrink-0">
           <Icon size={20} strokeWidth={2.1} />
         </span>
-        <span className="text-[0.8rem] font-semibold tracking-[0.12em] text-ink-400">
+        <h3 className="min-w-0 flex-1 text-[1.12rem] font-extrabold leading-tight text-ink-900">
+          {service.title}
+        </h3>
+        <span className="shrink-0 text-[0.8rem] font-semibold tracking-[0.12em] text-ink-400">
           {number}
         </span>
       </div>
-      <h3 className="relative mt-5 text-[1.12rem] font-extrabold text-ink-900">{service.title}</h3>
-      {service.description ? (
-        <p className="relative mt-1.5 max-w-[17rem] pr-2 text-[0.9rem] leading-relaxed text-ink-500">
-          {service.description}
+      {text ? <p className="sr-only">{text}</p> : null}
+      {open && text ? (
+        <p className="relative mt-1.5 max-w-[17rem] pr-2 text-[0.9rem] leading-relaxed text-ink-500" aria-hidden>
+          {shown}
+          {typing ? (
+            <span className="ml-0.5 inline-block h-[1em] w-px translate-y-[2px] animate-pulse bg-cyan-ink align-middle" />
+          ) : null}
         </p>
       ) : null}
       <div className="dept-card__foot">

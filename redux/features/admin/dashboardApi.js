@@ -7,9 +7,10 @@ export const dashboardApi = apiSlice.injectEndpoints({
       providesTags: ["Dashboard"],
     }),
     downloadPortfolio: builder.mutation({
-      query: () => ({
+      query: (body) => ({
         url: "api/admin/portfolio/",
-        method: "GET",
+        method: "POST",
+        body,
         headers: { Accept: "application/pdf, application/json" },
         cache: "no-store",
         responseHandler: async (response) => {

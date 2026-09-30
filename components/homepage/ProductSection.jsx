@@ -1,17 +1,18 @@
 "use client";
 
-import { CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
+import ShowcaseWorkCard, { WorkDialog } from "@/components/ui/ShowcaseWorkCard";
 import { useGetPublishedProductsQuery } from "@/redux/features/cms/productsApi";
 import SectionShell from "@/components/layouts/SectionShell";
-import { CardWatermark } from "@/components/illustrations";
 
 export default function ProductShowcase({ surface = "bg-pale" }) {
   const { data: products = [], isLoading, isError, refetch } =
     useGetPublishedProductsQuery();
+  const [open, setOpen] = useState(null);
 
   return (
     <section className={`section showcase-section ${surface}`}>
@@ -55,45 +56,33 @@ export default function ProductShowcase({ surface = "bg-pale" }) {
             getKey={(item) => item.id}
             label="company products"
             renderItem={(product) => (
-              <article className="showcase-carousel-card">
-                <div className="showcase-media showcase-media--cover">
-                  {product.imageScreen || product.image ? (
+              <ShowcaseWorkCard
+                title={product.title}
+                description={product.description}
+                tags={(product.features || []).slice(0, 3)}
+                href={product.url || "/portfolio"}
+                external={Boolean(product.url)}
+                linkLabel={product.url ? "Open project" : "View portfolio"}
+                topic={product}
+                onMore={() => setOpen({ title: product.title, description: product.description })}
+                image={
+                  product.imageScreen || product.image ? (
                     <Image
                       src={product.imageScreen || product.image}
-                      alt={product.title}
+                      alt=""
                       fill
                       sizes="(max-width: 768px) 80vw, 24rem"
                       className="object-cover"
                     />
-                  ) : null}
-                </div>
-                <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5">
-                  <CardWatermark topic={product} tone="navy" size="md" />
-                  <h3 className="relative text-lg font-bold sm:text-xl">{product.title}</h3>
-                  {product.description ? (
-                    <p className="relative mt-2 line-clamp-3 text-sm leading-relaxed">
-                      {product.description}
-                    </p>
-                  ) : null}
-                  {(product.features || []).length > 0 && (
-                    <ul className="mt-4 grid gap-2">
-                      {(product.features || []).slice(0, 3).map((feature) => (
-                        <li key={feature} className="flex items-start gap-2 text-sm">
-                          <CheckCircle2 className="mt-0.5 shrink-0 text-accent" size={16} />
-                          <span className="line-clamp-1">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <Link href={product.url || "/contact"} className="btn btn-primary mt-5 w-full">
-                    Get In Touch
-                    <ArrowRight size={16} className="btn-icon" />
-                  </Link>
-                </div>
-              </article>
+                  ) : null
+                }
+              />
             )}
           />
         )}
+        {open ? (
+          <WorkDialog title={open.title} description={open.description} onClose={() => setOpen(null)} />
+        ) : null}
       </SectionShell>
     </section>
   );

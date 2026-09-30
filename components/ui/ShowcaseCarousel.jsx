@@ -5,8 +5,6 @@ import { motion, useReducedMotion, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useShowcaseCarousel, wrapIndex } from "@/hooks/useShowcaseCarousel";
 
-const OFFSETS = [-2, -1, 0, 1, 2];
-
 function depthClass(distance) {
   if (distance < 0.5) return "is-center";
   if (distance < 1.5) return "is-adjacent";
@@ -104,6 +102,7 @@ export default function ShowcaseCarousel({
   } = useShowcaseCarousel({ count, reduceMotion: reduce });
   const [step, setStep] = useState(360);
   const [trackHeight, setTrackHeight] = useState(0);
+  const [reach, setReach] = useState(2);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -111,8 +110,16 @@ export default function ShowcaseCarousel({
     const measure = () => {
       const slides = [...root.querySelectorAll(".showcase-carousel-slide")];
       if (!slides.length) return;
-      setStep(slides[0].offsetWidth + readGap(root));
+      const cardWidth = slides[0].offsetWidth;
+      const stepWidth = cardWidth + readGap(root);
+      setStep(stepWidth);
       const viewport = root.querySelector(".showcase-carousel-viewport");
+      if (viewport && stepWidth > 0) {
+        const half = viewport.clientWidth / 2;
+        const needed = Math.ceil((half - cardWidth * 0.44) / stepWidth + 1);
+        const nextReach = Math.min(12, Math.max(2, needed));
+        setReach((current) => (current === nextReach ? current : nextReach));
+      }
       const styles = viewport ? getComputedStyle(viewport) : null;
       const pad = styles
         ? parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom)
@@ -126,25 +133,30 @@ export default function ShowcaseCarousel({
         ...slides.map((slide) => slide.offsetHeight)
       );
       if (!contentHeight) return;
+      root.style.setProperty("--showcase-card-height", `${Math.round(contentHeight)}px`);
       const nextHeight = Math.round(contentHeight + pad);
       setTrackHeight((current) => (Math.abs(current - nextHeight) < 2 ? current : nextHeight));
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(root);
+    const viewport = root.querySelector(".showcase-carousel-viewport");
+    if (viewport) observer.observe(viewport);
     root.querySelectorAll(".showcase-carousel-slide").forEach((slide) => observer.observe(slide));
     return () => observer.disconnect();
-  }, [count, rootRef, size, base]);
+  }, [count, rootRef, size, base, reach]);
 
   const slots = useMemo(() => {
     if (!count) return [];
-    const offsets = count < 2 ? [0] : OFFSETS;
+    const max = count < 2 ? 0 : reach;
+    const offsets = [];
+    for (let offset = -max; offset <= max; offset += 1) offsets.push(offset);
     return offsets.map((offset) => {
       const logical = base + offset;
       const item = items[wrapIndex(logical, count)];
       return { offset, logical, item, key: `${getKey(item)}-${logical}` };
     });
-  }, [base, count, getKey, items]);
+  }, [base, count, getKey, items, reach]);
 
   if (!count) return null;
 

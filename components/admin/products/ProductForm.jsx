@@ -22,8 +22,10 @@ import MediaField from "../media/MediaField";
 const EMPTY = {
   name: "",
   description: "",
+  project_type: "",
   url: "",
   features: [""],
+  stack: [""],
   sort_order: 0,
   is_active: true,
 };
@@ -50,8 +52,10 @@ export default function ProductForm({ productId }) {
     setValues({
       name: data.name || "",
       description: data.description || "",
+      project_type: data.project_type || "",
       url: data.url || "",
       features: data.features?.length ? data.features : [""],
+      stack: data.stack?.length ? data.stack : [""],
       sort_order: data.sort_order ?? 0,
       is_active: Boolean(data.is_active),
     });
@@ -101,6 +105,7 @@ export default function ProductForm({ productId }) {
     let payload = {
       ...values,
       features: values.features.map((item) => item.trim()).filter(Boolean),
+      stack: values.stack.map((item) => item.trim()).filter(Boolean),
     };
     for (const key of ["image", "screen_image"]) {
       payload = withMediaSource(payload, key, files[key], mediaIds[key]);
@@ -159,6 +164,16 @@ export default function ProductForm({ productId }) {
           />
         </label>
         <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold text-ink-700">Product type</span>
+          <input
+            name="project_type"
+            value={values.project_type}
+            onChange={handleChange}
+            className={ADMIN_INPUT}
+            placeholder="E-Commerce"
+          />
+        </label>
+        <label className="block">
           <span className="mb-1.5 block text-sm font-semibold text-ink-700">Product URL</span>
           <input
             name="url"
@@ -199,6 +214,49 @@ export default function ProductForm({ productId }) {
           Add feature
         </button>
         {errors.features && <p className="text-xs font-semibold text-red-700">{errors.features}</p>}
+      </div>
+
+      <div className="card space-y-3 p-6">
+        <p className="text-sm font-bold text-ink-900">Stack or tools</p>
+        {values.stack.map((tool, index) => (
+          <div key={index} className="flex gap-2">
+            <input
+              value={tool}
+              onChange={(event) =>
+                setValues((prev) => {
+                  const stack = [...prev.stack];
+                  stack[index] = event.target.value;
+                  return { ...prev, stack };
+                })
+              }
+              className={ADMIN_INPUT}
+              placeholder={`Tool ${index + 1}`}
+            />
+            {values.stack.length > 1 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setValues((prev) => ({
+                    ...prev,
+                    stack: prev.stack.filter((_, itemIndex) => itemIndex !== index),
+                  }))
+                }
+                className="rounded-lg border border-line px-2 text-ink-500 hover:text-red-700"
+                aria-label="Remove tool"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setValues((prev) => ({ ...prev, stack: [...prev.stack, ""] }))}
+          className="btn btn-ghost btn-sm"
+        >
+          <Plus size={14} aria-hidden />
+          Add tool
+        </button>
       </div>
 
       <div className="card grid gap-6 p-6 sm:grid-cols-2">

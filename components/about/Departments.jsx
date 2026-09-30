@@ -1,37 +1,44 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import ActiveDepartment from "./ActiveDepartment";
-import DepartmentGrid, { DepartmentStage } from "./DepartmentGrid";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { useGetPublishedDepartmentsQuery } from "@/redux/features/cms/departmentsApi";
 import SectionShell from "@/components/layouts/SectionShell";
+import { slugify } from "@/lib/slug";
+
+const EASE = [0.22, 1, 0.36, 1];
+
+export function departmentTabId(department) {
+  return `department-tab-${slugify(department?.name || department?.id || "department")}`;
+}
 
 export default function DepartmentSection({ showHeading = true, surface = "bg-pale" }) {
   const { data: departments = [], isLoading, isError, refetch } =
     useGetPublishedDepartmentsQuery();
-  const [activeDepartment, setActiveDepartment] = useState(null);
-  const activeRef = useRef(null);
+  const [activeId, setActiveId] = useState(null);
+  const activeDepartment =
+    departments.find((department) => department.id === activeId) || departments[0] || null;
 
   useEffect(() => {
-    if (activeDepartment && !departments.some((dept) => dept.id === activeDepartment.id)) {
-      setActiveDepartment(null);
+    if (!departments.length) {
+      setActiveId(null);
+      return;
     }
-  }, [departments, activeDepartment]);
-
-  useEffect(() => {
-    if (activeDepartment && activeRef.current) {
-      activeRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }, [activeDepartment]);
+    const hash = window.location.hash.replace(/^#/, "");
+    const hashed = hash
+      ? departments.find((department) => departmentTabId(department) === hash)
+      : null;
+    setActiveId((current) => {
+      if (hashed) return hashed.id;
+      if (departments.some((department) => department.id === current)) return current;
+      return departments[0].id;
+    });
+  }, [departments]);
 
   return (
     <section className={`section ${surface}`}>
-      <DepartmentStage>
         <SectionShell>
           {showHeading ? (
             <SectionHeading
@@ -67,26 +74,45 @@ export default function DepartmentSection({ showHeading = true, surface = "bg-pa
             </p>
           )}
 
-          {departments.length > 0 && (
-            <DepartmentGrid
-              departments={departments}
-              onSelect={setActiveDepartment}
-              ctaHref="/contact"
-            />
-          )}
+          {activeDepartment && (
+            <>
+              <div role="tablist" aria-label="Departments" className="service-tabs no-scrollbar">
+                {departments.map((department) => {
+                  const selected = activeDepartment.id === department.id;
+                  return (
+                    <button
+                      key={department.id}
+                      type="button"
+                      role="tab"
+                      id={departmentTabId(department)}
+                      aria-controls="department-panel"
+                      aria-selected={selected}
+                      onClick={() => setActiveId(department.id)}
+                      className="service-tab"
+                    >
+                      {department.name}
+                    </button>
+                  );
+                })}
+              </div>
 
-          <div ref={activeRef} className="relative z-[1] scroll-mt-28">
-            <AnimatePresence>
-              {activeDepartment && (
-                <ActiveDepartment
-                  department={activeDepartment}
-                  onClose={() => setActiveDepartment(null)}
-                />
-              )}
-            </AnimatePresence>
-          </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeDepartment.id}
+                  id="department-panel"
+                  role="tabpanel"
+                  aria-labelledby={departmentTabId(activeDepartment)}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35, ease: EASE }}
+                >
+                  <ActiveDepartment department={activeDepartment} showClose={false} />
+                </motion.div>
+              </AnimatePresence>
+            </>
+          )}
         </SectionShell>
-      </DepartmentStage>
     </section>
   );
 }

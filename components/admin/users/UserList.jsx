@@ -13,7 +13,7 @@ function formatWhen(value) {
 
 export default function UserList() {
   const { data: users = [], error, isLoading, refetch } = useGetAdminUsersQuery();
-  const djangoUsers = `${(process.env.SERVER || "http://localhost:8000").replace(/\/+$/, "")}/django-admin/auth/user/`;
+  const djangoUsers = `${(process.env.SERVER || "http://localhost:8888").replace(/\/+$/, "")}/django-admin/auth/user/`;
 
   return (
     <div className="mx-auto max-w-6xl">

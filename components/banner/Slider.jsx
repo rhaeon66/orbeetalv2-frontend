@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { useGetPublishedSlidesQuery } from "@/redux/features/cms/slidesApi";
-import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import {
   EASE,
   carouselCopy,
@@ -23,18 +23,18 @@ export default function BannerSlider({ surface = "bg-sage" }) {
   const reduceMotion = useReducedMotion();
   const { data: slides = [], isLoading, isError, refetch } =
     useGetPublishedSlidesQuery();
-  const { data: homepage } = useGetPublishedHomepageQuery();
-  const featuredStat =
-    homepage?.stats?.find((item) => item.featured) || homepage?.stats?.[0];
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [hovered, setHovered] = useState(false);
   const [interacted, setInteracted] = useState(false);
   const [compact, setCompact] = useState(false);
   const [pageHidden, setPageHidden] = useState(false);
+  const [offscreen, setOffscreen] = useState(false);
+  const [controlsHover, setControlsHover] = useState(false);
   const resumeRef = useRef(null);
+  const sectionRef = useRef(null);
+  const primed = useRef(false);
   const count = slides.length;
-  const paused = hovered || interacted || pageHidden;
+  const paused = interacted || pageHidden || offscreen || controlsHover;
 
   const markInteract = useCallback(() => {
     setInteracted(true);
@@ -62,6 +62,12 @@ export default function BannerSlider({ surface = "bg-sage" }) {
   );
 
   useEffect(() => {
+    if (!count) return;
+    if (!primed.current) {
+      primed.current = true;
+      setCurrent(0);
+      return;
+    }
     if (current >= count) setCurrent(0);
   }, [count, current]);
 
@@ -81,18 +87,21 @@ export default function BannerSlider({ surface = "bg-sage" }) {
   }, []);
 
   useEffect(() => {
-    if (paused || count < 2 || reduceMotion) return;
+    const node = sectionRef.current;
+    if (!node) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setOffscreen(!entry.isIntersecting),
+      { threshold: 0.25 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (paused || count < 2 || reduceMotion) return undefined;
     const timer = setInterval(() => nextSlide(false), SLIDE_DURATION);
     return () => clearInterval(timer);
   }, [paused, nextSlide, count, reduceMotion]);
-
-  useEffect(() => {
-    const urls = [slides[current]?.image, slides[(current + 1) % count]?.image].filter(Boolean);
-    urls.forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
-  }, [slides, current, count]);
 
   useEffect(() => () => window.clearTimeout(resumeRef.current), []);
 
@@ -132,15 +141,8 @@ export default function BannerSlider({ surface = "bg-sage" }) {
 
   return (
     <section
+      ref={sectionRef}
       className={`relative overflow-hidden ${surface}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocusCapture={(event) => {
-        if (event.target.closest("a, input, textarea, select")) setHovered(true);
-      }}
-      onBlurCapture={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false);
-      }}
       onKeyDown={onKeyDown}
       tabIndex={0}
       aria-roledescription="carousel"
@@ -166,7 +168,7 @@ export default function BannerSlider({ surface = "bg-sage" }) {
           : slide.headline}
       </p>
 
-      <SectionShell className="relative grid items-center gap-8 pb-12 pt-24 sm:gap-10 sm:pb-14 sm:pt-28 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-12 lg:pb-16 lg:pt-32">
+      <SectionShell className="relative grid min-h-[36rem] items-center gap-8 pb-12 pt-24 sm:gap-10 sm:pb-14 sm:pt-28 lg:min-h-[40rem] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8 lg:pb-16 lg:pt-32">
         <div className="min-w-0">
           <AnimatePresence mode="wait" custom={direction} initial={false}>
             <motion.div
@@ -223,35 +225,28 @@ export default function BannerSlider({ surface = "bg-sage" }) {
           </AnimatePresence>
         </div>
 
-        <div className="relative mx-auto w-full max-w-lg lg:row-span-2 lg:mt-0 lg:max-w-none">
+        <div className="relative mx-auto w-full min-w-0 max-w-xl lg:row-span-2 lg:mt-0 lg:max-w-none">
           <HeroVisual
             theme={theme}
-            image={slide.image}
-            alt={slide.headline || slide.tag || "Orbeetal service"}
             direction={direction}
             compact={compact}
             slideKey={current}
           />
-          <div className="stat-badge relative z-10 mt-3 w-fit lg:absolute lg:-bottom-3 lg:right-3 lg:mt-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-500">
-              {featuredStat?.label || "Projects Delivered"}
-            </p>
-            <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900">
-              {featuredStat ? `${featuredStat.value}` : "120"}
-              <span className="text-accent">{featuredStat?.suffix || "+"}</span>
-            </p>
-          </div>
         </div>
 
         {count > 1 && (
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3"
+            onMouseEnter={() => setControlsHover(true)}
+            onMouseLeave={() => setControlsHover(false)}
+          >
             <button
               type="button"
               onClick={() => prevSlide(true)}
               aria-label="Previous slide"
               className="icon-btn"
             >
-              <ArrowLeft size={18} />
+              <IconArrowLeft size={18} stroke={1.75} />
             </button>
             <div className="flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1.5">
               {slides.map((item, i) => (
@@ -277,7 +272,7 @@ export default function BannerSlider({ surface = "bg-sage" }) {
               aria-label="Next slide"
               className="icon-btn"
             >
-              <ArrowRight size={18} />
+              <IconArrowRight size={18} stroke={1.75} />
             </button>
           </div>
         )}

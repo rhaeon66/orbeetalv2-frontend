@@ -10,8 +10,23 @@ import { useGetPublishedServicesQuery } from "@/redux/features/cms/servicesApi";
 import SectionShell from "@/components/layouts/SectionShell";
 import { slugify } from "@/lib/slug";
 import { CardWatermark } from "@/components/illustrations";
+import { HeroScene } from "@/components/banner/hero/HeroScenes";
 
 const EASE = [0.22, 1, 0.36, 1];
+
+const SERVICE_SCENES = {
+  "software development": "web",
+  "ai solutions": "ai",
+  "digital marketing": "growth",
+  "product design": "mobile",
+  "web development": "web",
+  "cyber security": "cyber",
+  cybersecurity: "cyber",
+};
+
+function serviceScene(service) {
+  return SERVICE_SCENES[(service?.name || "").trim().toLowerCase()] || null;
+}
 
 function serviceTabId(service) {
   return `service-tab-${slugify(service?.name || service?.id || "service")}`;
@@ -77,11 +92,7 @@ export default function ServicesSection({ surface = "bg-pale" }) {
 
         {activeService && (
           <>
-            <div
-              role="tablist"
-              aria-label="Services"
-              className="no-scrollbar section-stack -mx-4 mb-10 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0"
-            >
+            <div role="tablist" aria-label="Services" className="service-tabs no-scrollbar">
               {services.map((service) => {
                 const selected = activeService.id === service.id;
                 return (
@@ -93,11 +104,7 @@ export default function ServicesSection({ surface = "bg-pale" }) {
                     aria-controls="service-panel"
                     aria-selected={selected}
                     onClick={() => setActiveId(service.id)}
-                    className={`min-h-11 snap-start whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 sm:text-base ${
-                      selected
-                        ? "bg-primary text-on-primary shadow-[var(--shadow-brand)]"
-                        : "border border-line bg-surface text-ink-700 hover:border-primary/30 hover:text-primary"
-                    }`}
+                    className="service-tab"
                   >
                     {service.name}
                   </button>
@@ -146,13 +153,18 @@ export default function ServicesSection({ surface = "bg-pale" }) {
                   </Link>
                 </div>
 
-                <div className="relative mx-auto aspect-[4/3] w-full max-w-md overflow-hidden rounded-[1.25rem] border border-line bg-surface-muted shadow-[var(--shadow-md)] lg:max-w-none">
-                  {activeService.image ? (
+                <div className="relative mx-auto aspect-square w-full max-w-md lg:max-w-none">
+                  {serviceScene(activeService) ? (
+                    <HeroScene
+                      theme={{ id: serviceScene(activeService) }}
+                      className="relative h-full w-full"
+                    />
+                  ) : activeService.image ? (
                     <Image
                       src={activeService.image}
                       alt={activeService.name}
                       fill
-                      className="object-contain p-8"
+                      className="object-contain"
                       unoptimized={String(activeService.image).endsWith(".svg")}
                       priority
                     />

@@ -6,6 +6,7 @@ import {
   useGetAdminHomepageQuery,
   useUpdateHomepageMutation,
 } from "@/redux/features/cms/homepageApi";
+import { useGetAdminClientsQuery } from "@/redux/features/cms/clientsApi";
 import {
   ADMIN_INPUT,
   fieldErrors,
@@ -22,6 +23,7 @@ const TABS = [
   ["why", "Why Choose Us"],
   ["method", "Methodology"],
   ["expertise", "Expertise"],
+  ["trust", "Hero logos"],
 ];
 
 const EMPTY = {
@@ -50,6 +52,7 @@ const EMPTY = {
   expertise_highlight: "",
   expertise_subtitle: "",
   expertise_items: [{ title: "", description: "", icon: "" }],
+  trust_client_ids: [],
 };
 
 function withFallback(list, blank) {
@@ -89,11 +92,13 @@ function homepageValues(data) {
     expertise_highlight: data.expertise_highlight || "",
     expertise_subtitle: data.expertise_subtitle || "",
     expertise_items: withFallback(data.expertise_items, EMPTY.expertise_items[0]),
+    trust_client_ids: Array.isArray(data.trust_client_ids) ? data.trust_client_ids : [],
   };
 }
 
 export default function HomepageForm() {
   const { data, isLoading, error, refetch } = useGetAdminHomepageQuery();
+  const { data: clients = [] } = useGetAdminClientsQuery();
   const [updateHomepage, updateState] = useUpdateHomepageMutation();
   const [tab, setTab] = useState("stats");
   const [values, setValues] = useState(EMPTY);
@@ -619,6 +624,71 @@ export default function HomepageForm() {
               Add card
             </button>
           </div>
+        </div>
+      )}
+
+      {tab === "trust" && (
+        <div className="card space-y-4 p-6">
+          <div>
+            <p className="text-sm font-bold text-ink-900">Hero trust logos</p>
+            <p className="mt-1 text-sm text-ink-500">
+              Choose which clients appear next to “Trusted by 50+ businesses worldwide”.
+              The order you select them is the order on the homepage. If none are selected,
+              the first four published clients are used.
+            </p>
+          </div>
+          {clients.filter((client) => client.is_active).length === 0 ? (
+            <p className="text-sm font-semibold text-ink-500">
+              Add clients in the Clients section first.
+            </p>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {clients
+                .filter((client) => client.is_active)
+                .map((client) => {
+                  const selected = values.trust_client_ids.includes(client.id);
+                  return (
+                    <label
+                      key={client.id}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          setValues((prev) => {
+                            const ids = prev.trust_client_ids || [];
+                            return {
+                              ...prev,
+                              trust_client_ids: selected
+                                ? ids.filter((id) => id !== client.id)
+                                : [...ids, client.id],
+                            };
+                          })
+                        }
+                      />
+                      <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line bg-pale">
+                        {client.logo_url ? (
+                          <img
+                            src={client.logo_url}
+                            alt=""
+                            className="h-full w-full object-contain p-0.5"
+                          />
+                        ) : null}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-ink-900">
+                          {client.name}
+                        </span>
+                        {!client.logo_url ? (
+                          <span className="text-xs text-ink-500">No logo yet</span>
+                        ) : null}
+                      </span>
+                    </label>
+                  );
+                })}
+            </div>
+          )}
         </div>
       )}
 

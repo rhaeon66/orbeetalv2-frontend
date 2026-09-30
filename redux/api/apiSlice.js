@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_BASE = (process.env.SERVER || "http://localhost:8000").replace(
+const API_BASE = (process.env.SERVER || "http://localhost:8888").replace(
   /\/+$/,
   ""
 );

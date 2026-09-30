@@ -20,9 +20,13 @@ export default function ProjectList() {
   const [deleteProject, { isLoading: deleting }] = useDeleteProjectMutation();
   const [pendingDelete, setPendingDelete] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [stage, setStage] = useState("all");
 
-  const visible =
-    filter === "all" ? projects : projects.filter((item) => item.category === filter);
+  const visible = projects.filter((item) => {
+    const categoryOk = filter === "all" || item.category === filter;
+    const stageOk = stage === "all" || (item.status || "finished") === stage;
+    return categoryOk && stageOk;
+  });
 
   async function toggleActive(project) {
     await updateProject({
@@ -45,7 +49,7 @@ export default function ProjectList() {
     <div className="mx-auto max-w-6xl">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-500">
-          Portfolio projects across own products, partnerships, and client work.
+          Finished projects appear on the website. Running and upcoming stay in the admin until you mark them finished.
         </p>
         <div className="flex flex-wrap gap-2">
           <DownloadPortfolioButton variant="ghost" />
@@ -54,6 +58,28 @@ export default function ProjectList() {
             Add project
           </Link>
         </div>
+      </div>
+
+      <div className="mb-3 flex flex-wrap gap-2">
+        {[
+          ["all", "All stages"],
+          ["finished", "Finished"],
+          ["running", "Running"],
+          ["upcoming", "Upcoming"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setStage(value)}
+            className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+              stage === value
+                ? "bg-primary text-white"
+                : "bg-cream text-ink-600 ring-1 ring-line"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
@@ -135,7 +161,13 @@ export default function ProjectList() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-ink-600">{categoryLabel(project.category)}</td>
+                  <td className="px-4 py-3 text-ink-600">
+                    <span className="block">{categoryLabel(project.category)}</span>
+                    <span className="block text-xs capitalize text-ink-500">
+                      {project.status || "finished"}
+                      {project.project_type ? ` · ${project.project_type}` : ""}
+                    </span>
+                  </td>
                   <td className="hidden px-4 py-3 tabular-nums text-ink-600 sm:table-cell">{project.sort_order}</td>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => toggleActive(project)}>

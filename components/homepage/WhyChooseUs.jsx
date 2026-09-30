@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -9,14 +10,43 @@ import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
 import { CardWatermark } from "@/components/illustrations";
 
-function FeatureRow({ service }) {
+function FeatureRow({ service, index, started }) {
   const reduce = useReducedMotion();
+  const timerRef = useRef(null);
+  const text = service.description || "";
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!started) return undefined;
+    if (reduce || !text) {
+      setCount(text.length);
+      return undefined;
+    }
+    const delay = window.setTimeout(() => {
+      timerRef.current = window.setInterval(() => {
+        setCount((current) => {
+          if (current >= text.length) {
+            window.clearInterval(timerRef.current);
+            return current;
+          }
+          return current + 1;
+        });
+      }, 16);
+    }, index * 140);
+    return () => {
+      window.clearTimeout(delay);
+      window.clearInterval(timerRef.current);
+    };
+  }, [started, reduce, text, index]);
+
+  const shown = text.slice(0, count);
+  const typing = started && count > 0 && count < text.length;
+
   return (
     <motion.div
       variants={fadeRight}
-      whileHover={reduce ? undefined : { y: -4 }}
       transition={{ duration: 0.22, ease: EASE }}
-      className="card group flex items-start gap-3.5 p-4 transition-colors duration-200 hover:border-cyan/50"
+      className="card group flex items-start gap-3.5 p-4 transition-colors duration-200 hover:border-cyan/50 hover:bg-accent-light/50"
     >
       <CardWatermark topic={service} tone="cyan" size="sm" />
       <span className="icon-well transition-colors duration-200 group-hover:bg-accent-light">
@@ -32,13 +62,17 @@ function FeatureRow({ service }) {
       </span>
       <div className="relative min-w-0 flex-1">
         <h3 className="text-[0.95rem] font-semibold text-ink-900">{service.title}</h3>
-        <p className="mt-1 text-sm leading-relaxed text-ink-500">{service.description}</p>
+        {text ? <p className="sr-only">{text}</p> : null}
+        {count > 0 ? (
+          <p className="mt-1 min-h-[1.25rem] text-sm leading-relaxed text-ink-500" aria-hidden>
+            {shown}
+            {typing ? (
+              <span className="ml-0.5 inline-block h-[1em] w-px translate-y-[2px] animate-pulse bg-cyan-ink align-middle" />
+            ) : null}
+          </p>
+        ) : null}
       </div>
-      <ArrowRight
-        size={16}
-        className="relative z-[1] mt-1 shrink-0 text-ink-400 transition-transform duration-200 group-hover:translate-x-[3px] group-hover:text-cyan-ink"
-        aria-hidden
-      />
+      <ArrowRight size={16} className="relative z-[1] mt-1 shrink-0 text-ink-400" aria-hidden />
     </motion.div>
   );
 }
@@ -47,9 +81,26 @@ export default function WhyChooseUs({ surface = "bg-sage" }) {
   const { data, isLoading, isError, refetch } = useGetPublishedHomepageQuery();
   const why = data?.why;
   const reduce = useReducedMotion();
+  const sectionRef = useRef(null);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setStarted(true);
+        observer.disconnect();
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [why]);
 
   return (
-    <section className={`section ${surface}`}>
+    <section ref={sectionRef} className={`section ${surface}`}>
       <SectionShell>
         <SectionHeading
           eyebrow={why?.eyebrow || "Why Choose Us"}
@@ -91,18 +142,15 @@ export default function WhyChooseUs({ surface = "bg-sage" }) {
               viewport={viewportOnce}
               variants={scaleIn}
             >
-              <div className="media-frame relative aspect-[4/3] w-full">
-                {why.image ? (
-                  <Image
-                    src={why.image}
-                    alt="Orbeetal team at work"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-pale" />
-                )}
+              <div className="media-frame relative aspect-square w-full">
+                <img
+                  src="/images/why-company.svg"
+                  alt="Orbeetal team at work"
+                  width={550}
+                  height={550}
+                  draggable={false}
+                  className="absolute inset-0 h-full w-full object-contain"
+                />
               </div>
             </motion.div>
 
@@ -113,8 +161,8 @@ export default function WhyChooseUs({ surface = "bg-sage" }) {
               viewport={viewportOnce}
               variants={stagger(0.04, 0.08)}
             >
-              {(why.items || []).map((service) => (
-                <FeatureRow key={service.title} service={service} />
+              {(why.items || []).map((service, index) => (
+                <FeatureRow key={service.title} service={service} index={index} started={started} />
               ))}
             </motion.div>
           </div>

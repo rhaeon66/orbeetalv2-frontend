@@ -3,13 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, ArrowLeft, Phone, MapPin, Globe, Linkedin, Github, Facebook, Instagram, Twitter, Youtube, Dribbble, PenTool, ExternalLink } from "lucide-react";
 import Header from "@/components/banner/Header";
 import { useGetPublishedTeamQuery } from "@/redux/features/cms/teamApi";
 import { slugify } from "@/lib/slug";
 import { pageSurface } from "@/lib/surfaces";
 import SectionShell from "@/components/layouts/SectionShell";
 import { CardWatermark } from "@/components/illustrations";
+
+const SOCIALS = [
+  ["website", "Website", Globe],
+  ["linkedin", "LinkedIn", Linkedin],
+  ["github", "GitHub", Github],
+  ["facebook", "Facebook", Facebook],
+  ["instagram", "Instagram", Instagram],
+  ["x_url", "X", Twitter],
+  ["youtube", "YouTube", Youtube],
+  ["behance", "Behance", PenTool],
+  ["dribbble", "Dribbble", Dribbble],
+];
 
 export default function TeamProfilePage() {
   const { slug } = useParams();
@@ -52,7 +64,7 @@ export default function TeamProfilePage() {
           )}
 
           {member && (
-            <article className="mx-auto mt-10 max-w-3xl">
+            <article className="mx-auto mt-10 max-w-4xl">
               <div className="flex flex-col items-center text-center">
                 <div className="relative h-36 w-36 overflow-hidden rounded-full bg-pale ring-2 ring-cyan/30">
                   {member.image ? (
@@ -79,6 +91,44 @@ export default function TeamProfilePage() {
                   {member.bio}
                 </p>
               ) : null}
+
+              {(member.phone || member.location || SOCIALS.some(([key]) => member[key])) && (
+                <div className="mt-8 flex flex-col items-center gap-4">
+                  {(member.phone || member.location) && (
+                    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-semibold text-ink-700">
+                      {member.phone ? (
+                        <a href={`tel:${member.phone}`} className="inline-flex items-center gap-2 hover:text-cyan-ink">
+                          <Phone size={16} aria-hidden />
+                          {member.phone}
+                        </a>
+                      ) : null}
+                      {member.location ? (
+                        <span className="inline-flex items-center gap-2">
+                          <MapPin size={16} aria-hidden />
+                          {member.location}
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                  {SOCIALS.some(([key]) => member[key]) && (
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {SOCIALS.filter(([key]) => member[key]).map(([key, label, Icon]) => (
+                        <a
+                          key={key}
+                          href={member[key]}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={label}
+                          className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-semibold text-ink-800 transition-colors hover:border-cyan/50 hover:text-cyan-ink"
+                        >
+                          <Icon size={15} aria-hidden />
+                          {label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="mt-8 grid grid-cols-3 gap-3">
                 <div className="card p-4 text-center">
@@ -113,6 +163,54 @@ export default function TeamProfilePage() {
                       </span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {member.portfolio?.length > 0 && (
+                <div className="mt-10">
+                  <h2 className="text-lg font-bold text-ink-900">Portfolio</h2>
+                  <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {member.portfolio.map((item) => (
+                      <li key={`${item.title}-${item.year}`} className="card p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-bold text-ink-900">{item.title}</h3>
+                          {item.year ? (
+                            <span className="shrink-0 text-xs font-semibold text-ink-500">{item.year}</span>
+                          ) : null}
+                        </div>
+                        {item.description ? (
+                          <p className="mt-2 text-sm leading-relaxed text-ink-500">{item.description}</p>
+                        ) : null}
+                        {item.url ? (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-ink hover:text-accent"
+                          >
+                            View project
+                            <ExternalLink size={14} aria-hidden />
+                          </a>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {member.details?.length > 0 && (
+                <div className="mt-10">
+                  <h2 className="text-lg font-bold text-ink-900">More information</h2>
+                  <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {member.details.map((item) => (
+                      <div key={item.label} className="card px-4 py-3">
+                        <dt className="text-xs font-bold uppercase tracking-[0.12em] text-ink-500">
+                          {item.label}
+                        </dt>
+                        <dd className="mt-1 text-sm font-semibold text-ink-900">{item.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 </div>
               )}
 

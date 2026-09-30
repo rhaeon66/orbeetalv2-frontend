@@ -1,41 +1,33 @@
 "use client";
 
 import Image from "next/image";
-import { useGetPublishedClientsQuery } from "@/redux/features/cms/clientsApi";
-
-const FALLBACK = ["A", "B", "C", "D"];
+import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 
 export default function TrustRow() {
-  const { data: clients = [] } = useGetPublishedClientsQuery();
-  const logos = clients.filter((item) => item.logo).slice(0, 4);
+  const { data } = useGetPublishedHomepageQuery();
+  const logos = data?.trust_logos || [];
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex -space-x-2" aria-hidden>
-        {logos.length
-          ? logos.map((client) => (
-              <div
-                key={client.id}
-                className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-cream bg-pale"
-              >
-                <Image
-                  src={client.logo}
-                  alt=""
-                  fill
-                  sizes="32px"
-                  className="object-contain p-0.5"
-                />
-              </div>
-            ))
-          : FALLBACK.map((letter) => (
-              <div
-                key={letter}
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-cream bg-pale text-[10px] font-bold text-primary"
-              >
-                {letter}
-              </div>
-            ))}
-      </div>
+      {logos.length > 0 ? (
+        <div className="flex items-center gap-2">
+          {logos.map((client) => (
+            <div
+              key={client.id}
+              className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-cream bg-pale"
+              title={client.name}
+            >
+              <Image
+                src={client.logo}
+                alt=""
+                fill
+                sizes="32px"
+                className="object-contain p-0.5"
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
       <p className="text-sm text-ink-500">
         Trusted by{" "}
         <span className="font-semibold text-ink-800">50+ businesses</span>{" "}

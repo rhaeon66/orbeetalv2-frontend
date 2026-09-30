@@ -4,7 +4,8 @@ import { Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { useGetPublishedDepartmentsQuery } from "@/redux/features/cms/departmentsApi";
 import SectionShell from "@/components/layouts/SectionShell";
-import DepartmentGrid, { DepartmentStage } from "@/components/about/DepartmentGrid";
+import DepartmentGrid from "@/components/about/DepartmentGrid";
+import { departmentTabId } from "@/components/about/Departments";
 
 export default function DepartmentPreview({ surface = "bg-sage" }) {
   const { data: departments = [], isLoading, isError, refetch } =
@@ -12,7 +13,6 @@ export default function DepartmentPreview({ surface = "bg-sage" }) {
 
   return (
     <section className={`section ${surface}`}>
-      <DepartmentStage>
         <SectionShell>
           <SectionHeading
             eyebrow="Our Structure"
@@ -43,12 +43,11 @@ export default function DepartmentPreview({ surface = "bg-sage" }) {
           {departments.length > 0 && (
             <DepartmentGrid
               departments={departments}
-              hrefFor={() => "/departments"}
+              hrefFor={(department) => `/departments#${departmentTabId(department)}`}
               ctaHref="/contact"
             />
           )}
         </SectionShell>
-      </DepartmentStage>
     </section>
   );
 }

@@ -24,13 +24,22 @@ const EMPTY = {
   name: "",
   description: "",
   category: "client",
+  status: "finished",
+  project_type: "",
   url: "",
   features: [""],
+  stack: [""],
   related_name: "",
   related_role: "",
   sort_order: 0,
   is_active: true,
 };
+
+const PROJECT_STATUSES = [
+  { value: "finished", label: "Finished — on the website" },
+  { value: "running", label: "Running — admin only" },
+  { value: "upcoming", label: "Upcoming — admin only" },
+];
 
 export default function ProjectForm({ projectId }) {
   const router = useRouter();
@@ -55,8 +64,11 @@ export default function ProjectForm({ projectId }) {
       name: data.name || "",
       description: data.description || "",
       category: data.category || "client",
+      status: data.status || "finished",
+      project_type: data.project_type || "",
       url: data.url || "",
       features: data.features?.length ? data.features : [""],
+      stack: data.stack?.length ? data.stack : [""],
       related_name: data.related_name || "",
       related_role: data.related_role || "",
       sort_order: data.sort_order ?? 0,
@@ -79,12 +91,16 @@ export default function ProjectForm({ projectId }) {
     }));
   }
 
-  function handleFeature(index, value) {
+  function handleList(field, index, value) {
     setValues((prev) => {
-      const features = [...prev.features];
-      features[index] = value;
-      return { ...prev, features };
+      const next = [...prev[field]];
+      next[index] = value;
+      return { ...prev, [field]: next };
     });
+  }
+
+  function handleFeature(index, value) {
+    handleList("features", index, value);
   }
 
   function addFeature() {
@@ -103,13 +119,17 @@ export default function ProjectForm({ projectId }) {
     const next = validateAdminRecord(values, {
       required: { name: "Enter a project title." },
       urls: ["url"],
-      choices: { category: ["own", "partnership", "client"] },
+      choices: {
+        category: ["own", "partnership", "client"],
+        status: ["finished", "running", "upcoming"],
+      },
     });
     setClientErrors(next);
     if (Object.keys(next).length) return;
     let payload = {
       ...values,
       features: values.features.map((item) => item.trim()).filter(Boolean),
+      stack: values.stack.map((item) => item.trim()).filter(Boolean),
     };
     for (const key of ["image", "logo", "related_image"]) {
       payload = withMediaSource(payload, key, files[key], mediaIds[key]);
@@ -178,6 +198,29 @@ export default function ProjectForm({ projectId }) {
             </select>
           </label>
           <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold text-ink-700">Project type</span>
+            <input
+              name="project_type"
+              value={values.project_type}
+              onChange={handleChange}
+              className={ADMIN_INPUT}
+              placeholder="E-Commerce"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold text-ink-700">Stage</span>
+            <select name="status" value={values.status} onChange={handleChange} className={ADMIN_INPUT}>
+              {PROJECT_STATUSES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+            <span className="mt-1 block text-xs text-ink-500">
+              Running and upcoming stay in the admin. Finished projects can appear on the website.
+            </span>
+          </label>
+          <label className="block sm:col-span-2">
             <span className="mb-1.5 block text-sm font-semibold text-ink-700">Project URL</span>
             <input
               name="url"
@@ -219,6 +262,43 @@ export default function ProjectForm({ projectId }) {
           Add feature
         </button>
         {errors.features && <p className="text-xs font-semibold text-red-700">{errors.features}</p>}
+      </div>
+
+      <div className="card space-y-3 p-6">
+        <p className="text-sm font-bold text-ink-900">Stack or tools</p>
+        {values.stack.map((tool, index) => (
+          <div key={index} className="flex gap-2">
+            <input
+              value={tool}
+              onChange={(event) => handleList("stack", index, event.target.value)}
+              className={ADMIN_INPUT}
+              placeholder={`Tool ${index + 1}`}
+            />
+            {values.stack.length > 1 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setValues((prev) => ({
+                    ...prev,
+                    stack: prev.stack.filter((_, itemIndex) => itemIndex !== index),
+                  }))
+                }
+                className="rounded-lg border border-line px-2 text-ink-500 hover:text-red-700"
+                aria-label="Remove tool"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setValues((prev) => ({ ...prev, stack: [...prev.stack, ""] }))}
+          className="btn btn-ghost btn-sm"
+        >
+          <Plus size={14} aria-hidden />
+          Add tool
+        </button>
       </div>
 
       <div className="card grid gap-6 p-6 sm:grid-cols-3">
@@ -290,7 +370,7 @@ export default function ProjectForm({ projectId }) {
             checked={values.is_active}
             onChange={handleChange}
           />
-          Active on portfolio
+          Show on the website when finished
         </label>
       </div>
 

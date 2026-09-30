@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack -p 3333",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "kill": "lsof -ti :3000 | xargs -r kill -9",
-    "reset": "lsof -ti :3000 | xargs -r kill -9; rm -rf .next .turbo node_modules package-lock.json; npm install; npm run dev"
+    "kill": "lsof -ti :3333 | xargs -r kill -9",
+    "reset": "lsof -ti :3333 | xargs -r kill -9; rm -rf .next .turbo node_modules package-lock.json; npm install; npm run dev"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
+    "@tabler/icons-react": "^3.48.0",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "lucide-react": "^0.542.0",

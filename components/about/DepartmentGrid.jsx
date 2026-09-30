@@ -5,19 +5,6 @@ import Link from "next/link";
 import DepartmentCard from "./DepartmentCard";
 import { splitDepartments } from "./departmentVisuals";
 
-function StageArt() {
-  return (
-    <div className="dept-stage__art" aria-hidden>
-      <span className="dept-stage__blob" style={{ width: "22rem", height: "22rem", left: "-7rem", top: "-8rem" }} />
-      <span className="dept-stage__blob" style={{ width: "16rem", height: "16rem", right: "-4rem", bottom: "18%" }} />
-      <span className="dept-stage__blob" style={{ width: "10rem", height: "10rem", left: "28%", bottom: "-3rem", opacity: 0.7 }} />
-      <span className="dept-stage__ring" style={{ width: "13rem", height: "13rem", right: "18%", top: "5.5rem" }} />
-      <span className="dept-stage__ring" style={{ width: "8rem", height: "8rem", left: "6%", top: "42%" }} />
-      <span className="dept-stage__dots dot-grid" />
-    </div>
-  );
-}
-
 export default function DepartmentGrid({
   departments,
   onSelect,
@@ -69,11 +56,3 @@ export default function DepartmentGrid({
   );
 }
 
-export function DepartmentStage({ children }) {
-  return (
-    <div className="dept-stage">
-      <StageArt />
-      <div className="relative z-[1]">{children}</div>
-    </div>
-  );
-}

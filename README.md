@@ -4,5 +4,5 @@ Next.js App Router app for the Orbeetal site. See the [repository README](../REA
 
 ```bash
 # from this directory
-SERVER=http://127.0.0.1:8000 npm run dev
+SERVER=http://localhost:8888 npm run dev
 ```

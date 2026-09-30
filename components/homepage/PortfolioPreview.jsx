@@ -1,18 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ShowcaseCarousel from "@/components/ui/ShowcaseCarousel";
+import ShowcaseWorkCard, { WorkDialog } from "@/components/ui/ShowcaseWorkCard";
 import { useGetPublishedProjectsQuery } from "@/redux/features/cms/projectsApi";
 import SectionShell from "@/components/layouts/SectionShell";
-import { CardWatermark } from "@/components/illustrations";
 
 export default function PortfolioPreview({ surface = "bg-cream" }) {
   const { data: projects = [], isLoading, isError, refetch } =
     useGetPublishedProjectsQuery();
   const featured = projects.slice(0, 6);
+  const [open, setOpen] = useState(null);
 
   return (
     <section className={`section showcase-section ${surface}`}>
@@ -52,12 +54,18 @@ export default function PortfolioPreview({ surface = "bg-cream" }) {
             renderItem={(project) => {
               const title = project.title || project.name;
               const summary = project.subtitle || project.description;
-              const href = project.link || "/portfolio";
-              const tags = (project.features || []).slice(0, 3);
               return (
-                <article className="showcase-carousel-card">
-                  <div className="showcase-media showcase-media--cover">
-                    {project.image ? (
+                <ShowcaseWorkCard
+                  title={title}
+                  description={summary}
+                  tags={(project.features || []).slice(0, 3)}
+                  href={project.link || "/portfolio"}
+                  external={Boolean(project.link)}
+                  linkLabel={project.link ? "Open project" : "View portfolio"}
+                  topic={project}
+                  onMore={() => setOpen({ title, description: summary })}
+                  image={
+                    project.image ? (
                       <Image
                         src={project.image}
                         alt=""
@@ -65,44 +73,16 @@ export default function PortfolioPreview({ surface = "bg-cream" }) {
                         sizes="(max-width: 768px) 80vw, 24rem"
                         className="object-cover"
                       />
-                    ) : null}
-                  </div>
-                  <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5">
-                    <CardWatermark topic={project} tone="cyan" size="md" />
-                    <h3 className="relative text-lg font-bold">{title}</h3>
-                    {summary ? (
-                      <p className="relative mt-2 line-clamp-3 text-sm leading-relaxed">
-                        {summary}
-                      </p>
-                    ) : null}
-                    {tags.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full border px-2.5 py-1 text-[11px] font-semibold"
-                            style={{ borderColor: "var(--showcase-border)" }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <a
-                      href={href}
-                      target={project.link ? "_blank" : undefined}
-                      rel={project.link ? "noreferrer" : undefined}
-                      className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent"
-                    >
-                      {project.link ? "Open project" : "View portfolio"}
-                      <ArrowUpRight size={14} />
-                    </a>
-                  </div>
-                </article>
+                    ) : null
+                  }
+                />
               );
             }}
           />
         )}
+        {open ? (
+          <WorkDialog title={open.title} description={open.description} onClose={() => setOpen(null)} />
+        ) : null}
 
         <div className="mt-8 flex justify-center">
           <Link href="/portfolio" className="btn btn-primary">

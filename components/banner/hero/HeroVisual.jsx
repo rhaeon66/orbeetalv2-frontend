@@ -4,14 +4,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { carouselVisual, carouselVisualReduce, EASE } from "@/components/ui/motion";
 import { HeroScene } from "./HeroScenes";
 
-export default function HeroVisual({
-  theme,
-  image,
-  alt,
-  direction,
-  compact,
-  slideKey,
-}) {
+export default function HeroVisual({ theme, direction, compact, slideKey }) {
   const reduce = useReducedMotion();
   const variants = reduce ? carouselVisualReduce : carouselVisual(compact);
 
@@ -26,9 +19,7 @@ export default function HeroVisual({
         exit={reduce ? undefined : "exit"}
         transition={{ duration: reduce ? 0.3 : 0.55, ease: EASE }}
       >
-        <div className="relative rounded-[1.5rem] border border-line bg-cream/80 p-3 shadow-[var(--shadow-sm)] sm:p-4">
-          <HeroScene theme={theme} image={image} alt={alt} />
-        </div>
+        <HeroScene theme={theme} />
       </motion.div>
     </AnimatePresence>
   );

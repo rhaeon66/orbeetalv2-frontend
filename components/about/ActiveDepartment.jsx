@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Check, Rocket, X } from "lucide-react";
 import { CardWatermark } from "@/components/illustrations";
 
-export default function ActiveDepartment({ department, onClose }) {
+export default function ActiveDepartment({ department, onClose, showClose = true }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -14,16 +14,18 @@ export default function ActiveDepartment({ department, onClose }) {
       className="card relative mx-auto section-stack max-w-4xl overflow-hidden px-5 py-8 sm:px-10 sm:py-12"
     >
       <CardWatermark topic={department} tone="cyan" size="lg" placement="right" />
-      <button
-        type="button"
-        onClick={onClose}
-        className="icon-btn absolute right-4 top-4 z-10 h-10 w-10"
-        aria-label="Close department details"
-      >
-        <X size={18} />
-      </button>
+      {showClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          className="icon-btn absolute right-4 top-4 z-10 h-10 w-10"
+          aria-label="Close department details"
+        >
+          <X size={18} />
+        </button>
+      ) : null}
 
-      <div className="mb-10 pr-10 text-center sm:pr-0">
+      <div className={`mb-10 text-center ${showClose ? "pr-10 sm:pr-0" : ""}`}>
         <h3 className="text-2xl font-extrabold text-primary sm:text-3xl">
           {department.name}
         </h3>
