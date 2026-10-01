@@ -56,14 +56,26 @@ export default function ClientSection({ surface = "bg-pale" }) {
             label="client brands"
             size="compact"
             renderItem={(client) => {
-              const card = (
-                <div className="showcase-carousel-card min-h-[11rem] items-center justify-center gap-3 px-5 pb-5 pt-2">
+              const linked = Boolean(client.url);
+              const Tag = linked ? "a" : "div";
+              return (
+                <Tag
+                  className="showcase-carousel-card min-h-[11rem] items-center justify-center gap-3 px-5 pb-5 pt-2"
+                  {...(linked
+                    ? {
+                        href: client.url,
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        title: client.url,
+                      }
+                    : {})}
+                >
                   <CardWatermark topic={client.name} motif="collaboration" tone="cyan" size="sm" />
                   <div className="showcase-media showcase-media--logo">
                     {client.logo ? (
                       <Image
                         src={client.logo}
-                        alt={client.name}
+                        alt=""
                         fill
                         sizes="64px"
                         className="object-contain p-2"
@@ -71,14 +83,7 @@ export default function ClientSection({ surface = "bg-pale" }) {
                     ) : null}
                   </div>
                   <p className="text-center text-sm font-semibold">{client.name}</p>
-                </div>
-              );
-              return client.url ? (
-                <a href={client.url} target="_blank" rel="noreferrer" className="block h-full">
-                  {card}
-                </a>
-              ) : (
-                card
+                </Tag>
               );
             }}
           />

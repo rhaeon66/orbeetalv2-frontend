@@ -97,9 +97,18 @@ export default function ClientList() {
                       </span>
                       <span>
                         <span className="block font-semibold text-ink-900">{item.name}</span>
-                        <span className="block max-w-md truncate text-xs text-ink-500">
-                          {item.url || "No website URL"}
-                        </span>
+                        {item.url ? (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block max-w-md truncate text-xs font-semibold text-primary hover:underline"
+                          >
+                            {item.url}
+                          </a>
+                        ) : (
+                          <span className="block max-w-md truncate text-xs text-ink-500">No website link</span>
+                        )}
                       </span>
                     </div>
                   </td>

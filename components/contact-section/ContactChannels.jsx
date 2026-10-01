@@ -1,39 +1,43 @@
+"use client";
+
 import { FaFacebook, FaLinkedin, FaWhatsapp } from "react-icons/fa";
 import { FiMail } from "react-icons/fi";
 import { SITE } from "@/lib/site";
+import { useSiteBrand } from "@/lib/useSiteBrand";
 import { CardWatermark } from "@/components/illustrations";
 
-const CHANNELS = [
-  {
-    label: "Email",
-    value: SITE.email,
-    href: `mailto:${SITE.email}`,
-    icon: FiMail,
-  },
-  {
-    label: "WhatsApp",
-    value: SITE.phoneDisplay,
-    href: SITE.whatsapp,
-    icon: FaWhatsapp,
-  },
-  {
-    label: "Facebook",
-    value: "facebook.com/Orbeetal",
-    href: SITE.facebook,
-    icon: FaFacebook,
-  },
-  {
-    label: "LinkedIn",
-    value: "linkedin.com/company/orbeetal",
-    href: SITE.linkedin,
-    icon: FaLinkedin,
-  },
-];
-
 export default function ContactChannels() {
+  const { email, phone, whatsapp } = useSiteBrand();
+  const channels = [
+    {
+      label: "Email",
+      value: email,
+      href: `mailto:${email}`,
+      icon: FiMail,
+    },
+    {
+      label: "WhatsApp",
+      value: phone,
+      href: whatsapp,
+      icon: FaWhatsapp,
+    },
+    {
+      label: "Facebook",
+      value: "facebook.com/Orbeetal",
+      href: SITE.facebook,
+      icon: FaFacebook,
+    },
+    {
+      label: "LinkedIn",
+      value: "linkedin.com/company/orbeetal",
+      href: SITE.linkedin,
+      icon: FaLinkedin,
+    },
+  ];
+
   return (
     <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-      {CHANNELS.map(({ label, value, href, icon: Icon }) => (
+      {channels.map(({ label, value, href, icon: Icon }) => (
         <li key={label}>
           <a
             href={href}

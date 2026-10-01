@@ -65,6 +65,7 @@ export default function TeamSection({ showHeading = true, surface = "bg-cream" }
                       src={member.image}
                       alt={member.name}
                       fill
+                      sizes="104px"
                       className="rounded-full object-cover object-top"
                       quality={90}
                     />

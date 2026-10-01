@@ -3,12 +3,81 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { EASE, fadeRight, scaleIn, stagger, viewportOnce } from "@/components/ui/motion";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
 import SectionShell from "@/components/layouts/SectionShell";
 import { CardWatermark } from "@/components/illustrations";
+
+function WhyCompanyArt() {
+  const ref = useRef(null);
+  const [markup, setMarkup] = useState("");
+  const [play, setPlay] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/images/why-company.svg")
+      .then((response) => {
+        if (!response.ok) throw new Error("why-company");
+        return response.text();
+      })
+      .then((text) => {
+        if (!cancelled) setMarkup(text);
+      })
+      .catch(() => {
+        if (!cancelled) setMarkup("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root || !markup || play) return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setPlay(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setPlay(true);
+        observer.disconnect();
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [markup, play]);
+
+  const html = play ? markup.replace("<svg ", '<svg class="animated" ') : markup;
+
+  if (!markup) {
+    return (
+      <img
+        src="/images/why-company.svg"
+        alt="Orbeetal team at work"
+        width={550}
+        height={550}
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-contain"
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={ref}
+      role="img"
+      aria-label="Orbeetal team at work"
+      className="absolute inset-0 [&_svg]:h-full [&_svg]:w-full"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
 
 function FeatureRow({ service, index, started }) {
   const reduce = useReducedMotion();
@@ -61,10 +130,10 @@ function FeatureRow({ service, index, started }) {
         ) : null}
       </span>
       <div className="relative min-w-0 flex-1">
-        <h3 className="text-[0.95rem] font-semibold text-ink-900">{service.title}</h3>
+        <h3 className="text-[0.95rem] font-semibold text-ink-900 group-hover:font-bold">{service.title}</h3>
         {text ? <p className="sr-only">{text}</p> : null}
         {count > 0 ? (
-          <p className="mt-1 min-h-[1.25rem] text-sm leading-relaxed text-ink-500" aria-hidden>
+          <p className="mt-1 min-h-[1.25rem] text-sm leading-relaxed text-ink-500 group-hover:font-bold" aria-hidden>
             {shown}
             {typing ? (
               <span className="ml-0.5 inline-block h-[1em] w-px translate-y-[2px] animate-pulse bg-cyan-ink align-middle" />
@@ -72,7 +141,6 @@ function FeatureRow({ service, index, started }) {
           </p>
         ) : null}
       </div>
-      <ArrowRight size={16} className="relative z-[1] mt-1 shrink-0 text-ink-400" aria-hidden />
     </motion.div>
   );
 }
@@ -143,14 +211,7 @@ export default function WhyChooseUs({ surface = "bg-sage" }) {
               variants={scaleIn}
             >
               <div className="media-frame relative aspect-square w-full">
-                <img
-                  src="/images/why-company.svg"
-                  alt="Orbeetal team at work"
-                  width={550}
-                  height={550}
-                  draggable={false}
-                  className="absolute inset-0 h-full w-full object-contain"
-                />
+                <WhyCompanyArt />
               </div>
             </motion.div>
 

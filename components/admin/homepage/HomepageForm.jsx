@@ -18,6 +18,7 @@ import {
 import MediaField from "../media/MediaField";
 
 const TABS = [
+  ["brand", "Logo & contact"],
   ["stats", "Statistics"],
   ["about", "About"],
   ["why", "Why Choose Us"],
@@ -27,6 +28,9 @@ const TABS = [
 ];
 
 const EMPTY = {
+  contact_email: "",
+  contact_website: "",
+  contact_phone: "",
   stats: [{ value: 0, suffix: "+", label: "", description: "", featured: false }],
   about_eyebrow: "",
   about_title: "",
@@ -59,8 +63,21 @@ function withFallback(list, blank) {
   return list?.length ? list : [blank];
 }
 
+function websiteError(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) {
+    return /^https?:\/\/\S+$/i.test(trimmed) ? "" : "Enter a valid website.";
+  }
+  if (/^[^\s]+\.[^\s]+$/.test(trimmed)) return "";
+  return "Enter a website such as www.orbeetal.com.";
+}
+
 function homepageValues(data) {
   return {
+    contact_email: data.contact_email || "",
+    contact_website: data.contact_website || "",
+    contact_phone: data.contact_phone || "",
     stats: withFallback(data.stats, EMPTY.stats[0]),
     about_eyebrow: data.about_eyebrow || "",
     about_title: data.about_title || "",
@@ -100,22 +117,23 @@ export default function HomepageForm() {
   const { data, isLoading, error, refetch } = useGetAdminHomepageQuery();
   const { data: clients = [] } = useGetAdminClientsQuery();
   const [updateHomepage, updateState] = useUpdateHomepageMutation();
-  const [tab, setTab] = useState("stats");
+  const [tab, setTab] = useState("brand");
   const [values, setValues] = useState(EMPTY);
   const [clientErrors, setClientErrors] = useState({});
-  const [files, setFiles] = useState({ about_image: null, why_image: null });
-  const [mediaIds, setMediaIds] = useState({ about_image: null, why_image: null });
-  const [previews, setPreviews] = useState({ about_image: "", why_image: "" });
+  const [files, setFiles] = useState({ brand_logo: null, about_image: null, why_image: null });
+  const [mediaIds, setMediaIds] = useState({ brand_logo: null, about_image: null, why_image: null });
+  const [previews, setPreviews] = useState({ brand_logo: "", about_image: "", why_image: "" });
 
   useEffect(() => {
     if (!data) return;
     setValues(homepageValues(data));
     setPreviews({
+      brand_logo: data.brand_logo_url || "",
       about_image: data.about_image_url || "",
       why_image: data.why_image_url || "",
     });
-    setFiles({ about_image: null, why_image: null });
-    setMediaIds({ about_image: null, why_image: null });
+    setFiles({ brand_logo: null, about_image: null, why_image: null });
+    setMediaIds({ brand_logo: null, about_image: null, why_image: null });
   }, [data]);
 
   function handleChange(event) {
@@ -146,8 +164,11 @@ export default function HomepageForm() {
     event.preventDefault();
     const next = validateAdminRecord(values, {
       hrefs: ["about_cta_href"],
+      emails: ["contact_email"],
       sortOrder: false,
     });
+    const website = websiteError(values.contact_website);
+    if (website) next.contact_website = website;
     setClientErrors(next);
     if (Object.keys(next).length) return;
     let payload = {
@@ -165,10 +186,10 @@ export default function HomepageForm() {
           .filter(Boolean),
       })),
     };
-    for (const key of ["about_image", "why_image"]) {
+    for (const key of ["brand_logo", "about_image", "why_image"]) {
       payload = withMediaSource(payload, key, files[key], mediaIds[key]);
     }
-    const body = toFormData(payload, ["about_image", "why_image"]);
+    const body = toFormData(payload, ["brand_logo", "about_image", "why_image"]);
     try {
       await updateHomepage(body).unwrap();
     } catch {
@@ -221,6 +242,72 @@ export default function HomepageForm() {
           </button>
         ))}
       </div>
+
+      {tab === "brand" && (
+        <div className="card space-y-4 p-6">
+          <p className="text-sm font-bold text-ink-900">Logo and contact</p>
+          <p className="text-sm text-ink-500">
+            Used on the website and in the portfolio PDF. Leave the logo empty to keep the current mark.
+          </p>
+          <MediaField
+            label="Logo"
+            preview={previews.brand_logo}
+            previewClassName="h-16 w-40 rounded-xl object-contain"
+            emptyLabel="Using the current Orbeetal logo."
+            error={errors.brand_logo || errors.brand_logo_from_media}
+            onFile={(file) => {
+              setFiles((prev) => ({ ...prev, brand_logo: file }));
+              setMediaIds((prev) => ({ ...prev, brand_logo: null }));
+              setPreviews((prev) => ({ ...prev, brand_logo: URL.createObjectURL(file) }));
+            }}
+            onLibrary={(item) => {
+              setFiles((prev) => ({ ...prev, brand_logo: null }));
+              setMediaIds((prev) => ({ ...prev, brand_logo: item.id }));
+              setPreviews((prev) => ({ ...prev, brand_logo: item.url }));
+            }}
+          />
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold text-ink-700">Website</span>
+            <input
+              name="contact_website"
+              value={values.contact_website}
+              onChange={handleChange}
+              className={ADMIN_INPUT}
+              placeholder="www.orbeetal.com"
+            />
+            {errors.contact_website && (
+              <p className="mt-1 text-xs font-semibold text-red-700">{errors.contact_website}</p>
+            )}
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold text-ink-700">Email</span>
+            <input
+              name="contact_email"
+              type="email"
+              value={values.contact_email}
+              onChange={handleChange}
+              className={ADMIN_INPUT}
+              placeholder="support@orbeetal.com"
+            />
+            {errors.contact_email && (
+              <p className="mt-1 text-xs font-semibold text-red-700">{errors.contact_email}</p>
+            )}
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold text-ink-700">Phone</span>
+            <input
+              name="contact_phone"
+              value={values.contact_phone}
+              onChange={handleChange}
+              className={ADMIN_INPUT}
+              placeholder="+88 01627480049"
+            />
+            {errors.contact_phone && (
+              <p className="mt-1 text-xs font-semibold text-red-700">{errors.contact_phone}</p>
+            )}
+          </label>
+        </div>
+      )}
 
       {tab === "stats" && (
         <div className="card space-y-4 p-6">

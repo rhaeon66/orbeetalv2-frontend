@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { fadeUp, stagger, viewportOnce } from "@/components/ui/motion";
 import { useGetPublishedHomepageQuery } from "@/redux/features/cms/homepageApi";
@@ -54,7 +54,7 @@ function ExpertiseCard({ service, index }) {
     <Link
       href={serviceHref(service)}
       className={`dept-card dept-card--service${open ? " is-open" : ""}`}
-      aria-label={`${service.title} — learn more`}
+      aria-label={service.title}
       onPointerDown={(event) => {
         pointerType.current = event.pointerType;
       }}
@@ -94,15 +94,6 @@ function ExpertiseCard({ service, index }) {
           ) : null}
         </p>
       ) : null}
-      <div className="dept-card__foot">
-        <span className="dept-more">
-          Learn more
-          <ArrowRight size={14} strokeWidth={2.4} />
-        </span>
-        <span className="dept-arrow">
-          <ArrowRight size={16} strokeWidth={2.2} />
-        </span>
-      </div>
     </Link>
   );
 }

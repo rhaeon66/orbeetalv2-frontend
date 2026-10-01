@@ -9,7 +9,9 @@ import {
   useGetAdminProjectsQuery,
   useUpdateProjectMutation,
 } from "@/redux/features/cms/projectsApi";
+import { fieldErrors, formErrorMessage } from "../form";
 import ConfirmDialog from "../ConfirmDialog";
+import ErrorPopup from "../ErrorPopup";
 import StatusBadge from "../StatusBadge";
 import DownloadPortfolioButton from "../DownloadPortfolioButton";
 import AdminTable from "../AdminTable";
@@ -19,6 +21,8 @@ export default function ProjectList() {
   const [updateProject] = useUpdateProjectMutation();
   const [deleteProject, { isLoading: deleting }] = useDeleteProjectMutation();
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [actionError, setActionError] = useState(null);
+  const [popupDismissed, setPopupDismissed] = useState(false);
   const [filter, setFilter] = useState("all");
   const [stage, setStage] = useState("all");
 
@@ -29,10 +33,16 @@ export default function ProjectList() {
   });
 
   async function toggleActive(project) {
-    await updateProject({
-      id: project.id,
-      body: { is_active: !project.is_active },
-    });
+    try {
+      await updateProject({
+        id: project.id,
+        body: { is_active: !project.is_active },
+      }).unwrap();
+      setActionError(null);
+    } catch (err) {
+      setPopupDismissed(false);
+      setActionError(err);
+    }
   }
 
   async function confirmDelete() {
@@ -40,13 +50,31 @@ export default function ProjectList() {
     try {
       await deleteProject(pendingDelete.id).unwrap();
       setPendingDelete(null);
-    } catch {
-      /* keep dialog open */
+      setActionError(null);
+    } catch (err) {
+      setPopupDismissed(false);
+      setActionError(err);
     }
   }
 
+  function actionMessage(err) {
+    const fields = Object.values(fieldErrors(err)).filter(Boolean);
+    if (fields.length) return fields.join(" ");
+    return formErrorMessage(err);
+  }
+
+  const popupMessages = [];
+  if (!popupDismissed && error) {
+    popupMessages.push(formErrorMessage(error) || "Could not load projects.");
+  }
+  if (!popupDismissed && actionError) popupMessages.push(actionMessage(actionError));
+
   return (
     <div className="mx-auto max-w-6xl">
+      <ErrorPopup
+        messages={popupMessages}
+        onClose={() => setPopupDismissed(true)}
+      />
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-500">
           Finished projects appear on the website. Running and upcoming stay in the admin until you mark them finished.

@@ -1,8 +1,11 @@
+"use client";
+
 import ContactChannels from "./ContactChannels";
 import { Clock, PhoneCall, ArrowRight } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { useSiteBrand } from "@/lib/useSiteBrand";
 
 export default function ContactLeft() {
+  const { phone, phoneTel } = useSiteBrand();
   return (
     <div className="max-w-2xl">
       <span className="eyebrow">Get In Touch</span>
@@ -47,10 +50,10 @@ export default function ContactLeft() {
         <div>
           <p className="font-semibold text-ink-700">Call to ask any question</p>
           <a
-            href={`tel:${SITE.phoneTel}`}
+            href={`tel:${phoneTel}`}
             className="mt-1 block text-lg font-extrabold text-ink-900 sm:text-xl"
           >
-            {SITE.phoneDisplay}
+            {phone}
           </a>
         </div>
       </div>

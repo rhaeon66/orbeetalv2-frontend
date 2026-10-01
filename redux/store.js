@@ -14,6 +14,7 @@ import './features/cms/productsApi';
 import './features/cms/departmentsApi';
 import './features/cms/clientsApi';
 import './features/cms/homepageApi';
+import './features/cms/siteApi';
 import './features/cms/mediaApi';
 
 const store = configureStore({

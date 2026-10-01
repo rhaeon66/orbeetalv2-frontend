@@ -35,7 +35,7 @@ export const projectsApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: [projectListTag, "Dashboard"],
+      invalidatesTags: [projectListTag, "Dashboard", { type: "Technology", id: "LIST" }],
     }),
     updateProject: builder.mutation({
       query: ({ id, body }) => ({
@@ -43,11 +43,10 @@ export const projectsApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Project", id },
-        projectListTag,
-        "Dashboard",
-      ],
+      invalidatesTags: (result, _error, { id }) =>
+        result
+          ? [{ type: "Project", id }, projectListTag, "Dashboard", { type: "Technology", id: "LIST" }]
+          : [],
     }),
     deleteProject: builder.mutation({
       query: (id) => ({

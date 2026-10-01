@@ -126,6 +126,9 @@ export default function ClientForm({ clientId }) {
             placeholder="https://"
           />
           {errors.url && <p className="mt-1 text-xs font-semibold text-red-700">{errors.url}</p>}
+          <p className="mt-1 text-xs text-ink-500">
+            Homepage visitors open this site when they click the brand. Leave it blank to show the logo without a link.
+          </p>
         </label>
         <MediaField
           label="Logo"

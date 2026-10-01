@@ -35,10 +35,10 @@ export default function Home() {
       <ProductSection surface={pageSurface(7)} />
       <PortfolioPreview surface={pageSurface(8)} />
       <TestimonialsSlider surface={pageSurface(9)} />
-      <ContactSection surface={pageSurface(10)} />
-      <TeamSection surface={pageSurface(11)} />
-      <ClientSection surface={pageSurface(12)} />
-      <FinalCta surface={pageSurface(13)} />
+      <TeamSection surface={pageSurface(10)} />
+      <ClientSection surface={pageSurface(11)} />
+      <FinalCta surface={pageSurface(12)} />
+      <ContactSection surface={pageSurface(13)} />
     </main>
   );
 }

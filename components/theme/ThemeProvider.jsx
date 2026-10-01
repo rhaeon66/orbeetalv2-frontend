@@ -9,11 +9,9 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() =>
-    typeof document !== "undefined" && document.documentElement.classList.contains("dark")
-      ? "dark"
-      : "light"
-  );
+  // Match the server render. The theme script may already have set the
+  // class; reading it here would hydrate a different icon than the server.
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);

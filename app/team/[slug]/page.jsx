@@ -72,6 +72,7 @@ export default function TeamProfilePage() {
                       src={member.image}
                       alt={member.name}
                       fill
+                      sizes="144px"
                       className="object-cover object-top"
                       quality={95}
                     />

@@ -8,13 +8,13 @@ export default function TrustRow() {
   const logos = data?.trust_logos || [];
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1.5">
       {logos.length > 0 ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {logos.map((client) => (
             <div
               key={client.id}
-              className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-cream bg-pale"
+              className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-ink-800 bg-pale"
               title={client.name}
             >
               <Image

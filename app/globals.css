@@ -1150,31 +1150,6 @@ html.dark .dept-arrow {
     0 16px 36px color-mix(in srgb, var(--cyan) 16%, transparent);
   outline: none;
 }
-.dept-card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: auto;
-  padding-top: 1.15rem;
-}
-.dept-more {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--cyan-ink);
-  transition: color 0.2s ease, gap 0.2s ease;
-}
-.dept-card--service:hover .dept-more,
-.dept-card--service:focus-visible .dept-more {
-  color: var(--cyan);
-}
-.dept-card--service .dept-arrow {
-  position: static;
-}
-
 .service-tabs {
   display: flex;
   align-items: center;
@@ -1347,8 +1322,14 @@ html.dark .method-num { box-shadow: 0 0 0 5px var(--sage); }
   flex-direction: column;
   align-items: flex-start;
   border-radius: 1.05rem;
-  border: 1px solid color-mix(in srgb, var(--cyan) 22%, var(--line));
-  background: color-mix(in srgb, #fff 78%, var(--pale));
+  border: 1px solid color-mix(in srgb, #fff 55%, var(--line));
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, #fff 62%, transparent) 0%,
+      color-mix(in srgb, var(--pale) 38%, transparent) 100%
+    );
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--cyan) 10%, transparent);
   padding: 1.65rem 0.95rem 1rem;
   text-align: left;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -1369,7 +1350,12 @@ html.dark .method-num { box-shadow: 0 0 0 5px var(--sage); }
 }
 html.dark .method-card {
   border-color: color-mix(in srgb, var(--cyan) 24%, var(--line));
-  background: var(--surface);
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--surface) 88%, transparent) 0%,
+      color-mix(in srgb, var(--pale) 28%, var(--surface)) 100%
+    );
 }
 .method-step.is-active .method-card,
 .method-step:focus-within .method-card {
@@ -1901,6 +1887,15 @@ html.dark .showcase-section {
   background: var(--showcase-far);
   color: var(--showcase-ink);
   box-shadow: 0 8px 22px rgba(15, 46, 70, 0.08);
+}
+a.showcase-carousel-card {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+a.showcase-carousel-card:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
 }
 .showcase-carousel-slide.is-adjacent .showcase-carousel-card {
   background: var(--showcase-adjacent);

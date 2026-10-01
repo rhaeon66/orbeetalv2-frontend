@@ -164,6 +164,7 @@ export default function ServicesSection({ surface = "bg-pale" }) {
                       src={activeService.image}
                       alt={activeService.name}
                       fill
+                      sizes="(max-width: 1024px) 100vw, 32rem"
                       className="object-contain"
                       unoptimized={String(activeService.image).endsWith(".svg")}
                       priority

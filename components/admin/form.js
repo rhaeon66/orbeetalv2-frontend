@@ -19,13 +19,24 @@ export function toFormData(values, fileKeys = []) {
   return data;
 }
 
+export function flattenError(value) {
+  if (value == null || value === false) return "";
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (Array.isArray(value)) return value.map(flattenError).filter(Boolean).join(" ");
+  if (typeof value === "object") {
+    return Object.values(value).map(flattenError).filter(Boolean).join(" ");
+  }
+  return String(value);
+}
+
 export function fieldErrors(error) {
   const raw = error?.data;
-  if (!raw || typeof raw !== "object") return {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const mapped = {};
   for (const [key, value] of Object.entries(raw)) {
     if (key === "detail" || key === "non_field_errors") continue;
-    mapped[key] = Array.isArray(value) ? value[0] : String(value);
+    const text = flattenError(value);
+    if (text) mapped[key] = text;
   }
   return mapped;
 }
@@ -123,6 +134,11 @@ export function validateAdminRecord(values, rules = {}) {
   for (const [field, allowed] of Object.entries(rules.choices || {})) {
     if (!allowed.includes(values[field])) {
       errors[field] = `Choose a valid ${field.replace(/_/g, " ")}.`;
+    }
+  }
+  for (const [field, max] of Object.entries(rules.maxLengths || {})) {
+    if (String(values[field] ?? "").length > max) {
+      errors[field] = `Use ${max} characters or fewer.`;
     }
   }
   if (rules.sortOrder !== false) {

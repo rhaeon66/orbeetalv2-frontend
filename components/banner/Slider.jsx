@@ -149,17 +149,15 @@ export default function BannerSlider({ surface = "bg-sage" }) {
       aria-label="Featured services"
     >
       <div className="hero-grid-quiet pointer-events-none absolute inset-0" />
-      <motion.div
+      <div
         aria-hidden
         className="pointer-events-none absolute -right-16 top-8 h-72 w-72 rounded-full blur-3xl lg:h-96 lg:w-96"
-        animate={{ backgroundColor: theme.glowA }}
-        transition={{ duration: reduceMotion ? 0 : 0.5, ease: EASE }}
+        style={{ backgroundColor: theme.glowA }}
       />
-      <motion.div
+      <div
         aria-hidden
         className="pointer-events-none absolute -right-8 bottom-0 h-56 w-56 rounded-full blur-3xl lg:h-72 lg:w-72"
-        animate={{ backgroundColor: theme.glowB }}
-        transition={{ duration: reduceMotion ? 0 : 0.5, ease: EASE }}
+        style={{ backgroundColor: theme.glowB }}
       />
 
       <p className="sr-only" aria-live="polite">

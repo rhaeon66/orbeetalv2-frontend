@@ -25,7 +25,7 @@ export const productsApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: [productListTag, "Dashboard"],
+      invalidatesTags: [productListTag, "Dashboard", { type: "Technology", id: "LIST" }],
     }),
     updateProduct: builder.mutation({
       query: ({ id, body }) => ({
@@ -33,11 +33,10 @@ export const productsApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Product", id },
-        productListTag,
-        "Dashboard",
-      ],
+      invalidatesTags: (result, _error, { id }) =>
+        result
+          ? [{ type: "Product", id }, productListTag, "Dashboard", { type: "Technology", id: "LIST" }]
+          : [],
     }),
     deleteProduct: builder.mutation({
       query: (id) => ({

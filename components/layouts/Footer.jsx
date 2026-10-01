@@ -7,6 +7,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import BasisBadge from "./BasisBadge";
 import BrandLogo from "@/components/brand/BrandLogo";
 import { FOOTER_NAV, LEGAL_NAV, SITE } from "@/lib/site";
+import { useSiteBrand } from "@/lib/useSiteBrand";
 import SectionShell from "@/components/layouts/SectionShell";
 
 const socialLinks = [
@@ -15,6 +16,8 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const { email, phone, phoneTel, whatsapp } = useSiteBrand();
+
   return (
     <footer className="charcoal-surface relative overflow-hidden text-white/70">
       <div className="dot-grid-light pointer-events-none absolute inset-0 opacity-20" />
@@ -24,8 +27,9 @@ export default function Footer() {
           <div className="text-left">
             <BrandLogo
               onDark
+              priority
               width={160}
-              height={60}
+              height={64}
               className="mb-6"
             />
             <p className="text-base leading-relaxed text-white/55">
@@ -86,14 +90,14 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2.5">
                 <FiPhone className="text-accent" />
-                <a href={`tel:${SITE.phoneTel}`} className="transition hover:text-accent">
-                  {SITE.phoneDisplay}
+                <a href={`tel:${phoneTel}`} className="transition hover:text-accent">
+                  {phone}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaWhatsapp className="text-accent" />
                 <a
-                  href={SITE.whatsapp}
+                  href={whatsapp}
                   target="_blank"
                   rel="noreferrer"
                   className="transition hover:text-accent"
@@ -103,8 +107,8 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <FiMail className="text-accent" />
-                <a href={`mailto:${SITE.email}`} className="transition hover:text-accent">
-                  {SITE.email}
+                <a href={`mailto:${email}`} className="transition hover:text-accent">
+                  {email}
                 </a>
               </li>
             </ul>

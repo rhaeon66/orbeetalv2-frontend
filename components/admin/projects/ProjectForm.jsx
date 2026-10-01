@@ -13,11 +13,14 @@ import {
 import {
   ADMIN_INPUT,
   fieldErrors,
+  flattenError,
   formErrorMessage,
   toFormData,
   validateAdminRecord,
   withMediaSource,
 } from "../form";
+import ErrorPopup from "../ErrorPopup";
+import StackPicker, { normalizeStack } from "../StackPicker";
 import MediaField from "../media/MediaField";
 
 const EMPTY = {
@@ -28,7 +31,7 @@ const EMPTY = {
   project_type: "",
   url: "",
   features: [""],
-  stack: [""],
+  stack: [],
   related_name: "",
   related_role: "",
   sort_order: 0,
@@ -40,6 +43,44 @@ const PROJECT_STATUSES = [
   { value: "running", label: "Running — admin only" },
   { value: "upcoming", label: "Upcoming — admin only" },
 ];
+
+const FIELD_LABELS = {
+  name: "Title",
+  description: "Description",
+  category: "Category",
+  status: "Stage",
+  project_type: "Project type",
+  url: "Project URL",
+  features: "Features",
+  stack: "Technology stack",
+  image: "Project image",
+  logo: "Logo",
+  related_image: "Attribution photo",
+  image_from_media: "Project image",
+  logo_from_media: "Logo",
+  related_image_from_media: "Attribution photo",
+  related_name: "Attribution name",
+  related_role: "Attribution role",
+  sort_order: "Display order",
+  is_active: "Visibility",
+};
+
+function labeledErrors(errors) {
+  return Object.entries(errors)
+    .filter(([, value]) => value)
+    .map(([key, value]) => {
+      const label = FIELD_LABELS[key];
+      const text = String(value);
+      return label ? `${label}: ${text}` : text;
+    });
+}
+
+function listLengthError(items, max, label) {
+  if (items.some((item) => String(item).trim().length > max)) {
+    return `Each ${label} must be ${max} characters or fewer.`;
+  }
+  return "";
+}
 
 export default function ProjectForm({ projectId }) {
   const router = useRouter();
@@ -54,6 +95,7 @@ export default function ProjectForm({ projectId }) {
 
   const [values, setValues] = useState(EMPTY);
   const [clientErrors, setClientErrors] = useState({});
+  const [hiddenErrorKey, setHiddenErrorKey] = useState("");
   const [files, setFiles] = useState({ image: null, logo: null, related_image: null });
   const [mediaIds, setMediaIds] = useState({ image: null, logo: null, related_image: null });
   const [previews, setPreviews] = useState({ image: "", logo: "", related_image: "" });
@@ -68,7 +110,7 @@ export default function ProjectForm({ projectId }) {
       project_type: data.project_type || "",
       url: data.url || "",
       features: data.features?.length ? data.features : [""],
-      stack: data.stack?.length ? data.stack : [""],
+      stack: normalizeStack(data.stack),
       related_name: data.related_name || "",
       related_role: data.related_role || "",
       sort_order: data.sort_order ?? 0,
@@ -116,6 +158,7 @@ export default function ProjectForm({ projectId }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setHiddenErrorKey("");
     const next = validateAdminRecord(values, {
       required: { name: "Enter a project title." },
       urls: ["url"],
@@ -123,13 +166,23 @@ export default function ProjectForm({ projectId }) {
         category: ["own", "partnership", "client"],
         status: ["finished", "running", "upcoming"],
       },
+      maxLengths: {
+        name: 255,
+        description: 500,
+        project_type: 80,
+        url: 200,
+        related_name: 255,
+        related_role: 120,
+      },
     });
+    const featureError = listLengthError(values.features, 300, "feature");
+    if (featureError) next.features = featureError;
     setClientErrors(next);
     if (Object.keys(next).length) return;
     let payload = {
       ...values,
       features: values.features.map((item) => item.trim()).filter(Boolean),
-      stack: values.stack.map((item) => item.trim()).filter(Boolean),
+      stack: normalizeStack(values.stack),
     };
     for (const key of ["image", "logo", "related_image"]) {
       payload = withMediaSource(payload, key, files[key], mediaIds[key]);
@@ -148,6 +201,17 @@ export default function ProjectForm({ projectId }) {
   }
 
   const errors = { ...fieldErrors(saveError), ...clientErrors };
+  const popupMessages = labeledErrors(errors);
+  if (typeof saveError?.data?.detail === "string") {
+    popupMessages.unshift(saveError.data.detail);
+  }
+  const nonField = flattenError(saveError?.data?.non_field_errors);
+  if (nonField) popupMessages.push(nonField);
+  if (saveError && popupMessages.length === 0) {
+    popupMessages.push(formErrorMessage(saveError));
+  }
+  const popupKey = popupMessages.join("\n");
+  const visiblePopup = hiddenErrorKey === popupKey ? [] : popupMessages;
 
   if (isEdit && isLoading) {
     return (
@@ -160,17 +224,21 @@ export default function ProjectForm({ projectId }) {
 
   if (isEdit && error) {
     return (
-      <div className="card p-6">
-        <p className="font-semibold text-ink-900">This project could not be loaded.</p>
-        <Link href="/admin/projects" className="btn btn-ghost btn-sm mt-4">
-          Back to projects
-        </Link>
-      </div>
+      <>
+        <ErrorPopup messages={[formErrorMessage(error)]} />
+        <div className="card p-6">
+          <p className="font-semibold text-ink-900">This project could not be loaded.</p>
+          <Link href="/admin/projects" className="btn btn-ghost btn-sm mt-4">
+            Back to projects
+          </Link>
+        </div>
+      </>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-3xl space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="mx-auto max-w-3xl space-y-6">
+      <ErrorPopup messages={visiblePopup} onClose={() => setHiddenErrorKey(popupKey)} />
       <div className="card space-y-4 p-6">
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold text-ink-700">Title</span>
@@ -179,12 +247,17 @@ export default function ProjectForm({ projectId }) {
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold text-ink-700">Description</span>
-          <input
+          <textarea
             name="description"
             value={values.description}
             onChange={handleChange}
+            rows={4}
             className={ADMIN_INPUT}
           />
+          <span className="mt-1 block text-xs text-ink-500">{values.description.length}/500</span>
+          {errors.description && (
+            <p className="mt-1 text-xs font-semibold text-red-700">{errors.description}</p>
+          )}
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
@@ -264,41 +337,13 @@ export default function ProjectForm({ projectId }) {
         {errors.features && <p className="text-xs font-semibold text-red-700">{errors.features}</p>}
       </div>
 
-      <div className="card space-y-3 p-6">
-        <p className="text-sm font-bold text-ink-900">Stack or tools</p>
-        {values.stack.map((tool, index) => (
-          <div key={index} className="flex gap-2">
-            <input
-              value={tool}
-              onChange={(event) => handleList("stack", index, event.target.value)}
-              className={ADMIN_INPUT}
-              placeholder={`Tool ${index + 1}`}
-            />
-            {values.stack.length > 1 && (
-              <button
-                type="button"
-                onClick={() =>
-                  setValues((prev) => ({
-                    ...prev,
-                    stack: prev.stack.filter((_, itemIndex) => itemIndex !== index),
-                  }))
-                }
-                className="rounded-lg border border-line px-2 text-ink-500 hover:text-red-700"
-                aria-label="Remove tool"
-              >
-                <Trash2 size={15} />
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => setValues((prev) => ({ ...prev, stack: [...prev.stack, ""] }))}
-          className="btn btn-ghost btn-sm"
-        >
-          <Plus size={14} aria-hidden />
-          Add tool
-        </button>
+      <div className="card relative z-20 space-y-3 p-6">
+        <p className="text-sm font-bold text-ink-900">Technology stack</p>
+        <StackPicker
+          value={values.stack}
+          onChange={(stack) => setValues((prev) => ({ ...prev, stack }))}
+          error={errors.stack}
+        />
       </div>
 
       <div className="card grid gap-6 p-6 sm:grid-cols-3">
@@ -373,12 +418,6 @@ export default function ProjectForm({ projectId }) {
           Show on the website when finished
         </label>
       </div>
-
-      {saveError && Object.keys(errors).length === 0 && (
-        <p className="alert-error">
-          {formErrorMessage(saveError)}
-        </p>
-      )}
 
       <div className="admin-form-actions flex flex-wrap gap-3">
         <button type="submit" className="btn btn-teal rounded-lg" disabled={pending}>

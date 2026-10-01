@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { ExternalLink, X } from "lucide-react";
 import { CardWatermark } from "@/components/illustrations";
+import TechLogo from "@/components/tech/TechLogo";
 
 export default function ProjectModal({ project, onClose }) {
   const closeRef = useRef(null);
@@ -106,6 +107,31 @@ export default function ProjectModal({ project, onClose }) {
                       ))}
                     </ul>
                   </div>
+
+                  {project.stack?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
+                        Technology stack
+                      </p>
+                      <ul className="mt-3 flex flex-wrap gap-2">
+                        {project.stack.map((item) => {
+                          const name = typeof item === "string" ? item : item.name;
+                          const logo = typeof item === "string" ? "" : item.logo;
+                          if (!name) return null;
+                          return (
+                            <li key={name}>
+                              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-2.5 py-1 text-sm font-semibold text-ink-800">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white p-0.5">
+                                  <TechLogo name={name} logo={logo} />
+                                </span>
+                                {name}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
 
                   {related && (
                     <div>

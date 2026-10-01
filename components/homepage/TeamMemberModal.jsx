@@ -141,6 +141,7 @@ export default function TeamMemberModal({ member, isOpen, onClose }) {
                                     src={member.image}
                                     alt={member.name}
                                     fill
+                                    sizes="144px"
                                     className="object-cover"
                                     quality={95}
                                 />
