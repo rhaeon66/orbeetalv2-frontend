@@ -129,7 +129,7 @@ export default function Footer() {
           <span>© {new Date().getFullYear()} Orbeetal. All rights reserved.</span>
           <span className="inline-flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            All systems nominal
+            All systems nominal — ready to ship
           </span>
         </SectionShell>
       </div>
