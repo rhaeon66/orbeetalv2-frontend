@@ -46,7 +46,7 @@ export default function Footer() {
                   aria-label={label}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white/80 ring-1 ring-white/15 transition-all duration-300 hover:bg-accent hover:text-[var(--on-cta)] hover:ring-accent"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white/80 ring-1 ring-white/15 transition-all duration-300 hover:bg-accent hover:text-on-cta hover:ring-accent"
                 >
                   {icon}
                 </Link>
@@ -129,7 +129,7 @@ export default function Footer() {
           <span>© {new Date().getFullYear()} Orbeetal. All rights reserved.</span>
           <span className="inline-flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            All systems nominal
+            All systems nominal — ready to ship
           </span>
         </SectionShell>
       </div>
